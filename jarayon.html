@@ -1,0 +1,1040 @@
+<!doctype html>
+<html lang="uz">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Loyiha jarayoni</title>
+    <style>
+      :root {
+        --bg: #f6f7f9;
+        --surface: #ffffff;
+        --surface-2: #f0f2f5;
+        --border: #e3e6eb;
+        --text: #15181d;
+        --muted: #677080;
+        --accent: #3b5bdb;
+
+        --st-plan: #8a93a3;
+        --st-plan-bg: #eef0f3;
+        --st-active: #2f6fdf;
+        --st-active-bg: #e4edfc;
+        --st-done: #1f9d61;
+        --st-done-bg: #e2f5ec;
+        --st-blocked: #d9480f;
+        --st-blocked-bg: #fde9e0;
+        --st-cancel: #9aa1ad;
+        --st-cancel-bg: #f1f2f4;
+
+        --radius: 12px;
+        --shadow: 0 1px 2px rgba(16, 24, 40, 0.05), 0 1px 3px rgba(16, 24, 40, 0.06);
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) {
+          --bg: #0f1115;
+          --surface: #171a20;
+          --surface-2: #1e222a;
+          --border: #2a2f39;
+          --text: #e8eaee;
+          --muted: #8d95a4;
+          --accent: #7b93ff;
+          --st-plan: #8d95a4;
+          --st-plan-bg: #232832;
+          --st-active: #6ea2ff;
+          --st-active-bg: #1b2a45;
+          --st-done: #4cc38a;
+          --st-done-bg: #15322a;
+          --st-blocked: #ff8a5c;
+          --st-blocked-bg: #3a2018;
+          --st-cancel: #6b7280;
+          --st-cancel-bg: #1e222a;
+          --shadow: none;
+        }
+      }
+      :root[data-theme="dark"] {
+        --bg: #0f1115;
+        --surface: #171a20;
+        --surface-2: #1e222a;
+        --border: #2a2f39;
+        --text: #e8eaee;
+        --muted: #8d95a4;
+        --accent: #7b93ff;
+        --st-plan: #8d95a4;
+        --st-plan-bg: #232832;
+        --st-active: #6ea2ff;
+        --st-active-bg: #1b2a45;
+        --st-done: #4cc38a;
+        --st-done-bg: #15322a;
+        --st-blocked: #ff8a5c;
+        --st-blocked-bg: #3a2018;
+        --st-cancel: #6b7280;
+        --st-cancel-bg: #1e222a;
+        --shadow: none;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+      }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font:
+          14px/1.5 -apple-system,
+          BlinkMacSystemFont,
+          "Inter",
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+      .wrap {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 24px 16px 64px;
+      }
+
+      header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 12px;
+        justify-content: space-between;
+        margin-bottom: 20px;
+      }
+      header h1 {
+        font-size: 20px;
+        margin: 0;
+        letter-spacing: -0.01em;
+      }
+      header .sub {
+        color: var(--muted);
+        font-size: 12.5px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--st-done);
+        display: inline-block;
+      }
+      .dot.stale {
+        background: var(--st-plan);
+      }
+      .btn {
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text);
+        border-radius: 8px;
+        padding: 6px 10px;
+        font: inherit;
+        font-size: 12.5px;
+        cursor: pointer;
+      }
+      .btn:hover {
+        background: var(--surface-2);
+      }
+
+      .kpis {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+      }
+      .kpi {
+        padding: 14px 16px;
+      }
+      .kpi .label {
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .kpi .value {
+        font-size: 24px;
+        font-weight: 650;
+        letter-spacing: -0.02em;
+        margin-top: 2px;
+        font-variant-numeric: tabular-nums;
+      }
+      .kpi .hint {
+        color: var(--muted);
+        font-size: 12px;
+        margin-top: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .bar {
+        height: 6px;
+        border-radius: 99px;
+        background: var(--surface-2);
+        overflow: hidden;
+        display: flex;
+      }
+      .bar > span {
+        display: block;
+        height: 100%;
+      }
+      .bar .b-done {
+        background: var(--st-done);
+      }
+      .bar .b-active {
+        background: var(--st-active);
+      }
+      .bar .b-blocked {
+        background: var(--st-blocked);
+      }
+
+      .tabs {
+        display: flex;
+        gap: 4px;
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 16px;
+        overflow-x: auto;
+      }
+      .tab {
+        background: none;
+        border: 0;
+        color: var(--muted);
+        font: inherit;
+        font-weight: 550;
+        padding: 10px 12px;
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        margin-bottom: -1px;
+        white-space: nowrap;
+      }
+      .tab[aria-selected="true"] {
+        color: var(--text);
+        border-bottom-color: var(--accent);
+      }
+      .tab .count {
+        color: var(--muted);
+        font-weight: 500;
+        margin-left: 4px;
+      }
+
+      /* Gantt */
+      .gantt {
+        padding: 16px;
+        margin-bottom: 16px;
+      }
+      .gantt h2,
+      .panel h2 {
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--muted);
+        margin: 0 0 12px;
+        font-weight: 600;
+      }
+      .g-track {
+        position: relative;
+        height: 34px;
+        background: var(--surface-2);
+        border-radius: 8px;
+      }
+      .g-seg {
+        position: absolute;
+        top: 4px;
+        bottom: 4px;
+        border-radius: 6px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11.5px;
+        font-weight: 600;
+        border: 1px solid transparent;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+      .g-seg.sel {
+        outline: 2px solid var(--accent);
+        outline-offset: 1px;
+      }
+      .g-today {
+        position: absolute;
+        top: -6px;
+        bottom: -6px;
+        width: 2px;
+        background: var(--st-blocked);
+        border-radius: 2px;
+      }
+      .g-today::after {
+        content: "Bugun";
+        position: absolute;
+        top: -16px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 10.5px;
+        color: var(--st-blocked);
+        font-weight: 600;
+      }
+      .g-axis {
+        display: flex;
+        justify-content: space-between;
+        color: var(--muted);
+        font-size: 11.5px;
+        margin-top: 6px;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: 320px 1fr;
+        gap: 16px;
+        align-items: start;
+      }
+      @media (max-width: 860px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .sprint-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .s-item {
+        padding: 12px 14px;
+        cursor: pointer;
+        text-align: left;
+        font: inherit;
+        color: inherit;
+        width: 100%;
+      }
+      .s-item:hover {
+        border-color: var(--muted);
+      }
+      .s-item.sel {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 1px var(--accent);
+      }
+      .s-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 6px;
+      }
+      .s-name {
+        font-weight: 600;
+      }
+      .s-name small {
+        color: var(--muted);
+        font-weight: 500;
+        margin-right: 6px;
+      }
+      .s-meta {
+        display: flex;
+        justify-content: space-between;
+        color: var(--muted);
+        font-size: 12px;
+        margin-top: 6px;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 11.5px;
+        font-weight: 600;
+        padding: 2px 8px;
+        border-radius: 99px;
+        white-space: nowrap;
+      }
+      .pill::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: currentColor;
+      }
+      .st-rejalashtirilgan {
+        color: var(--st-plan);
+        background: var(--st-plan-bg);
+      }
+      .st-jarayonda {
+        color: var(--st-active);
+        background: var(--st-active-bg);
+      }
+      .st-yakunlangan,
+      .st-bajarildi,
+      .st-qabul {
+        color: var(--st-done);
+        background: var(--st-done-bg);
+      }
+      .st-bloklangan {
+        color: var(--st-blocked);
+        background: var(--st-blocked-bg);
+      }
+      .st-to-xtatilgan,
+      .st-bekor {
+        color: var(--st-cancel);
+        background: var(--st-cancel-bg);
+      }
+      .st-taklif {
+        color: var(--st-active);
+        background: var(--st-active-bg);
+      }
+      .st-almashtirilgan {
+        color: var(--st-blocked);
+        background: var(--st-blocked-bg);
+      }
+
+      .panel {
+        padding: 20px;
+        min-width: 0;
+      }
+      .p-head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .p-head h3 {
+        margin: 0;
+        font-size: 18px;
+        letter-spacing: -0.01em;
+      }
+      .p-head .dates {
+        color: var(--muted);
+        font-size: 12.5px;
+        margin-top: 2px;
+      }
+      .p-goal {
+        color: var(--text);
+        opacity: 0.85;
+        margin: 12px 0 16px;
+      }
+      .p-stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin: 12px 0 18px;
+        font-size: 12.5px;
+        color: var(--muted);
+      }
+      .p-stats b {
+        color: var(--text);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 12px;
+        align-items: center;
+      }
+      .chip {
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--muted);
+        font: inherit;
+        font-size: 12px;
+        padding: 4px 10px;
+        border-radius: 99px;
+        cursor: pointer;
+      }
+      .chip[aria-pressed="true"] {
+        background: var(--text);
+        color: var(--surface);
+        border-color: var(--text);
+      }
+      .search {
+        margin-left: auto;
+        min-width: 0;
+        flex: 0 1 220px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text);
+        border-radius: 8px;
+        padding: 5px 10px;
+        font: inherit;
+        font-size: 12.5px;
+      }
+
+      .group {
+        margin-bottom: 14px;
+      }
+      .group h4 {
+        font-size: 12px;
+        color: var(--muted);
+        margin: 0 0 6px;
+        font-weight: 600;
+        display: flex;
+        justify-content: space-between;
+      }
+      .task {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 10px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        margin-bottom: 4px;
+        background: var(--surface);
+      }
+      .task .tid {
+        font:
+          11.5px/1 ui-monospace,
+          SFMono-Regular,
+          Menlo,
+          monospace;
+        color: var(--muted);
+        min-width: 44px;
+      }
+      .task .ttl {
+        flex: 1;
+        min-width: 0;
+      }
+      .task.is-bajarildi .ttl {
+        color: var(--muted);
+      }
+      .task.is-bekor .ttl {
+        color: var(--muted);
+        text-decoration: line-through;
+      }
+      .ico {
+        width: 16px;
+        height: 16px;
+        flex: none;
+        border-radius: 50%;
+        border: 1.5px solid var(--st-plan);
+        display: grid;
+        place-items: center;
+      }
+      .ico.i-jarayonda {
+        border-color: var(--st-active);
+        background: conic-gradient(var(--st-active) 0 50%, transparent 50% 100%);
+      }
+      .ico.i-bajarildi {
+        border-color: var(--st-done);
+        background: var(--st-done);
+      }
+      .ico.i-bajarildi::after {
+        content: "";
+        width: 4px;
+        height: 7px;
+        border: solid #fff;
+        border-width: 0 1.5px 1.5px 0;
+        transform: translateY(-1px) rotate(45deg);
+      }
+      .ico.i-bloklangan {
+        border-color: var(--st-blocked);
+        background: var(--st-blocked);
+      }
+      .ico.i-bloklangan::after {
+        content: "!";
+        color: #fff;
+        font-size: 10px;
+        font-weight: 800;
+        line-height: 1;
+      }
+      .ico.i-bekor {
+        border-color: var(--st-cancel);
+        border-style: dashed;
+      }
+
+      .dod {
+        margin-top: 18px;
+        padding-top: 16px;
+        border-top: 1px solid var(--border);
+      }
+      .dod ul {
+        margin: 0;
+        padding-left: 18px;
+      }
+      .dod li {
+        margin-bottom: 4px;
+      }
+      .links {
+        display: flex;
+        gap: 12px;
+        font-size: 12.5px;
+        flex-wrap: wrap;
+      }
+
+      .list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .dec {
+        padding: 16px;
+      }
+      .dec .d-top {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .dec h3 {
+        font-size: 15px;
+        margin: 0;
+      }
+      .dec h3 small {
+        font:
+          12px ui-monospace,
+          Menlo,
+          monospace;
+        color: var(--muted);
+        margin-right: 6px;
+      }
+      .dec .d-meta {
+        color: var(--muted);
+        font-size: 12px;
+        margin: 4px 0 8px;
+      }
+      .dec dl {
+        margin: 0;
+        display: grid;
+        grid-template-columns: 90px 1fr;
+        gap: 4px 12px;
+        font-size: 13px;
+      }
+      .dec dt {
+        color: var(--muted);
+      }
+      .dec dd {
+        margin: 0;
+      }
+      @media (max-width: 560px) {
+        .dec dl {
+          grid-template-columns: 1fr;
+        }
+        .dec dt {
+          margin-top: 6px;
+        }
+      }
+
+      .empty {
+        color: var(--muted);
+        padding: 28px;
+        text-align: center;
+      }
+      .err {
+        padding: 20px;
+        border-color: var(--st-blocked);
+        color: var(--st-blocked);
+      }
+      code {
+        font:
+          12.5px ui-monospace,
+          Menlo,
+          monospace;
+        background: var(--surface-2);
+        padding: 1px 5px;
+        border-radius: 4px;
+        overflow-wrap: anywhere;
+      }
+      [hidden] {
+        display: none !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <div>
+          <h1 id="title">Loyiha jarayoni</h1>
+          <div class="sub"><span class="dot" id="live"></span><span id="updated">Yuklanmoqda…</span></div>
+        </div>
+        <button class="btn" id="theme" type="button">Mavzu</button>
+      </header>
+
+      <div id="error" class="card err" hidden></div>
+
+      <section class="kpis" id="kpis"></section>
+
+      <nav class="tabs" role="tablist">
+        <button class="tab" role="tab" data-tab="sprintlar" aria-selected="true">Sprintlar</button>
+        <button class="tab" role="tab" data-tab="qarorlar" aria-selected="false">
+          Qarorlar<span class="count" id="c-q"></span>
+        </button>
+        <button class="tab" role="tab" data-tab="hisobotlar" aria-selected="false">
+          Hisobotlar<span class="count" id="c-h"></span>
+        </button>
+      </nav>
+
+      <section id="v-sprintlar">
+        <div class="card gantt">
+          <h2>Vaqt jadvali</h2>
+          <div class="g-track" id="gantt"></div>
+          <div class="g-axis" id="axis"></div>
+        </div>
+        <div class="layout">
+          <div class="sprint-list" id="sprints"></div>
+          <div class="card panel" id="detail"></div>
+        </div>
+      </section>
+
+      <section id="v-qarorlar" hidden><div class="list" id="decisions"></div></section>
+      <section id="v-hisobotlar" hidden><div class="list" id="reports"></div></section>
+    </div>
+
+    <script>
+      (() => {
+        const DATA_FILE = "jarayon.data.js";
+        const REFRESH_MS = 15000;
+        const TASK_STATUSES = ["rejalashtirilgan", "jarayonda", "bajarildi", "bloklangan", "bekor qilindi"];
+        const OY = ["yan", "fev", "mar", "apr", "may", "iyn", "iyl", "avg", "sen", "okt", "noy", "dek"];
+
+        const $ = (s) => document.querySelector(s);
+        const esc = (s) =>
+          String(s ?? "").replace(
+            /[&<>"']/g,
+            (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c],
+          );
+        const md = (s) =>
+          esc(s)
+            .replace(/`([^`]+)`/g, "<code>$1</code>")
+            .replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>");
+        const cls = (status) =>
+          "st-" +
+          String(status || "")
+            .split(" ")[0]
+            .replace(/'/g, "-");
+        const icoCls = (status) => "i-" + String(status || "").split(" ")[0];
+        const pill = (status) => `<span class="pill ${cls(status)}">${esc(status)}</span>`;
+        const parseDate = (s) => (s ? new Date(s + "T00:00:00") : null);
+        const fmt = (s) => {
+          const d = parseDate(s);
+          return d ? `${d.getDate()} ${OY[d.getMonth()]}` : "—";
+        };
+        const fmtY = (s) => {
+          const d = parseDate(s);
+          return d ? `${d.getDate()} ${OY[d.getMonth()]} ${d.getFullYear()}` : "—";
+        };
+
+        const store = {
+          get(k) {
+            try {
+              return localStorage.getItem(k);
+            } catch {
+              return null;
+            }
+          },
+          set(k, v) {
+            try {
+              localStorage.setItem(k, v);
+            } catch {}
+          },
+        };
+
+        const state = {
+          data: null,
+          tab: "sprintlar",
+          sprint: decodeURIComponent(location.hash.slice(1)) || null,
+          filter: "barchasi",
+          q: "",
+        };
+
+        // ---------- Mavzu ----------
+        const theme = store.get("jarayon-theme");
+        if (theme) document.documentElement.dataset.theme = theme;
+        $("#theme").addEventListener("click", () => {
+          const dark = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim() === "#0f1115";
+          const next = dark ? "light" : "dark";
+          document.documentElement.dataset.theme = next;
+          store.set("jarayon-theme", next);
+        });
+
+        // ---------- Hisob-kitob ----------
+        function counts(tasks) {
+          const c = Object.fromEntries(TASK_STATUSES.map((s) => [s, 0]));
+          for (const t of tasks) c[t.status] = (c[t.status] || 0) + 1;
+          c.jami = tasks.length;
+          c.faol = tasks.length - c["bekor qilindi"];
+          c.foiz = c.faol ? Math.round((c.bajarildi / c.faol) * 100) : 0;
+          return c;
+        }
+        function bar(c) {
+          if (!c.faol) return `<div class="bar"></div>`;
+          const w = (n) => (n / c.faol) * 100 + "%";
+          return `<div class="bar"><span class="b-done" style="width:${w(c.bajarildi)}"></span><span class="b-active" style="width:${w(c.jarayonda)}"></span><span class="b-blocked" style="width:${w(c.bloklangan)}"></span></div>`;
+        }
+        function currentSprint(sprints) {
+          return (
+            sprints.find((s) => s.status === "jarayonda") ||
+            sprints.find((s) => s.status !== "yakunlangan") ||
+            sprints[sprints.length - 1]
+          );
+        }
+
+        // ---------- Render ----------
+        function renderKpis() {
+          const { sprints, qarorlar } = state.data;
+          const all = counts(sprints.flatMap((s) => s.tasks));
+          const cur = currentSprint(sprints);
+          const curC = cur ? counts(cur.tasks) : null;
+          const doneSprints = sprints.filter((s) => s.status === "yakunlangan").length;
+          const today = new Date();
+          const end = parseDate(sprints[sprints.length - 1]?.tugash);
+          const leftDays = end ? Math.max(0, Math.ceil((end - today) / 864e5)) : null;
+
+          $("#kpis").innerHTML = `
+      <div class="card kpi"><div class="label">Umumiy progress</div><div class="value">${all.foiz}%</div>${bar(all)}<div class="hint">${all.bajarildi} / ${all.faol} vazifa</div></div>
+      <div class="card kpi"><div class="label">Joriy sprint</div><div class="value">${esc(cur?.id || "—")}</div><div class="hint">${esc(cur?.nomi || "")} · ${curC ? curC.foiz + "%" : ""}</div></div>
+      <div class="card kpi"><div class="label">Sprintlar</div><div class="value">${doneSprints} / ${sprints.length}</div><div class="hint">yakunlangan</div></div>
+      <div class="card kpi"><div class="label">Jarayonda / bloklangan</div><div class="value">${all.jarayonda} / ${all.bloklangan}</div><div class="hint">vazifa</div></div>
+      <div class="card kpi"><div class="label">Qarorlar</div><div class="value">${qarorlar.length}</div><div class="hint">${leftDays !== null ? `Rejaviy tugashgacha ${leftDays} kun` : ""}</div></div>`;
+        }
+
+        function renderGantt() {
+          const sprints = state.data.sprints.filter((s) => s.boshlanish && s.tugash);
+          if (!sprints.length) {
+            $("#gantt").innerHTML = "";
+            $("#axis").innerHTML = "";
+            return;
+          }
+          const min = parseDate(sprints[0].boshlanish).getTime();
+          const max = parseDate(sprints[sprints.length - 1].tugash).getTime() + 864e5;
+          const pos = (t) => ((t - min) / (max - min)) * 100;
+          let html = sprints
+            .map((s) => {
+              const l = pos(parseDate(s.boshlanish).getTime());
+              const r = pos(parseDate(s.tugash).getTime() + 864e5);
+              return `<div class="g-seg ${cls(s.status)} ${s.id === state.sprint ? "sel" : ""}" data-sprint="${esc(s.id)}" style="left:calc(${l}% + 1px);width:calc(${r - l}% - 2px)" title="${esc(s.id)} — ${esc(s.nomi)} (${fmt(s.boshlanish)} – ${fmt(s.tugash)})">${esc(s.id)}</div>`;
+            })
+            .join("");
+          const now = Date.now();
+          if (now >= min && now <= max) html += `<div class="g-today" style="left:${pos(now)}%"></div>`;
+          $("#gantt").innerHTML = html;
+          $("#axis").innerHTML =
+            `<span>${fmtY(sprints[0].boshlanish)}</span><span>${fmtY(sprints[sprints.length - 1].tugash)}</span>`;
+        }
+
+        function renderSprintList() {
+          $("#sprints").innerHTML = state.data.sprints
+            .map((s) => {
+              const c = counts(s.tasks);
+              return `<button type="button" class="card s-item ${s.id === state.sprint ? "sel" : ""}" data-sprint="${esc(s.id)}">
+        <div class="s-top"><div class="s-name"><small>${esc(s.id)}</small>${esc(s.nomi)}</div>${pill(s.status)}</div>
+        ${bar(c)}
+        <div class="s-meta"><span>${fmt(s.boshlanish)} – ${fmt(s.tugash)}</span><span>${c.bajarildi}/${c.faol} · ${c.foiz}%</span></div>
+      </button>`;
+            })
+            .join("");
+        }
+
+        function renderDetail() {
+          const s = state.data.sprints.find((x) => x.id === state.sprint);
+          if (!s) {
+            $("#detail").innerHTML = `<div class="empty">Sprintni tanlang</div>`;
+            return;
+          }
+          const c = counts(s.tasks);
+          const report = state.data.hisobotlar.find((h) => h.sprint === s.id);
+          const q = state.q.trim().toLowerCase();
+          const visible = s.tasks.filter(
+            (t) =>
+              (state.filter === "barchasi" || t.status === state.filter) &&
+              (!q || (t.title + " " + (t.id || "")).toLowerCase().includes(q)),
+          );
+          const groups = new Map();
+          for (const t of visible) {
+            if (!groups.has(t.group)) groups.set(t.group, []);
+            groups.get(t.group).push(t);
+          }
+
+          const chips = ["barchasi", ...TASK_STATUSES]
+            .map((f) => {
+              const n = f === "barchasi" ? c.jami : c[f];
+              if (f !== "barchasi" && !n) return "";
+              return `<button type="button" class="chip" data-filter="${esc(f)}" aria-pressed="${state.filter === f}">${esc(f)} · ${n}</button>`;
+            })
+            .join("");
+
+          const tasksHtml = groups.size
+            ? [...groups]
+                .map(([g, ts]) => {
+                  const gc = counts(ts);
+                  return `<div class="group"><h4><span>${esc(g)}</span><span>${gc.bajarildi}/${gc.faol}</span></h4>${ts
+                    .map(
+                      (t) =>
+                        `<div class="task is-${esc(t.status.split(" ")[0])}"><span class="ico ${icoCls(t.status)}" title="${esc(t.status)}"></span><span class="tid">${esc(t.id || "")}</span><span class="ttl">${md(t.title)}</span>${t.status === "rejalashtirilgan" || t.status === "bajarildi" ? "" : pill(t.status)}</div>`,
+                    )
+                    .join("")}</div>`;
+                })
+                .join("")
+            : `<div class="empty">Mos vazifa yo'q</div>`;
+
+          const dodHtml = s.dod.length
+            ? `<div class="dod"><h2>Qabul mezonlari</h2><ul>${s.dod.map((d) => `<li>${d.done === true ? "✅ " : d.done === false ? "⬜ " : ""}${md(d.text)}</li>`).join("")}</ul></div>`
+            : "";
+
+          $("#detail").innerHTML = `
+      <div class="p-head">
+        <div><h3>${esc(s.id)} — ${esc(s.nomi)}</h3><div class="dates">${fmtY(s.boshlanish)} – ${fmtY(s.tugash)}${s.davomiylik ? " · " + esc(s.davomiylik) : ""}</div></div>
+        ${pill(s.status)}
+      </div>
+      ${s.maqsad ? `<p class="p-goal">${md(s.maqsad)}</p>` : ""}
+      ${bar(c)}
+      <div class="p-stats">
+        <span><b>${c.foiz}%</b> bajarilgan</span>
+        <span><b>${c.bajarildi}</b> bajarildi</span>
+        <span><b>${c.jarayonda}</b> jarayonda</span>
+        <span><b>${c.bloklangan}</b> bloklangan</span>
+        <span><b>${c.rejalashtirilgan}</b> navbatda</span>
+      </div>
+      <div class="filters">${chips}<input class="search" id="search" type="search" placeholder="Vazifa qidirish…" value="${esc(state.q)}"></div>
+      ${tasksHtml}
+      ${dodHtml}
+      <div class="dod links"><a href="${esc(s.fayl)}">Sprint fayli</a>${report ? `<a href="${esc(report.fayl)}">Sprint hisoboti</a>` : `<span style="color:var(--muted)">Hisobot hali yo'q</span>`}</div>`;
+        }
+
+        function renderDecisions() {
+          const list = [...state.data.qarorlar].reverse();
+          $("#c-q").textContent = list.length;
+          $("#decisions").innerHTML = list.length
+            ? list
+                .map(
+                  (d) => `
+      <article class="card dec">
+        <div class="d-top"><h3><small>${esc(d.id)}</small>${esc(d.sarlavha)}</h3>${d.status ? pill(d.status) : ""}</div>
+        <div class="d-meta">${esc(fmtY(d.sana))}${d.sprint ? " · " + esc(d.sprint) : ""}</div>
+        <dl>
+          ${d.kontekst ? `<dt>Kontekst</dt><dd>${esc(d.kontekst)}</dd>` : ""}
+          ${d.qaror ? `<dt>Qaror</dt><dd>${md(d.qaror)}</dd>` : ""}
+          ${d.oqibat ? `<dt>Oqibat</dt><dd>${esc(d.oqibat)}</dd>` : ""}
+        </dl>
+      </article>`,
+                )
+                .join("")
+            : `<div class="card empty">Qarorlar hali yo'q</div>`;
+        }
+
+        function renderReports() {
+          const list = [...state.data.hisobotlar].reverse();
+          $("#c-h").textContent = list.length;
+          $("#reports").innerHTML = list.length
+            ? list
+                .map((h) => {
+                  const s = state.data.sprints.find((x) => x.id === h.sprint);
+                  return `<article class="card dec">
+        <div class="d-top"><h3><small>${esc(h.sprint)}</small>${esc(s?.nomi || "")}</h3>${h.status ? pill(h.status) : ""}</div>
+        <div class="d-meta">${esc(fmtY(h.sana))}</div>
+        <p style="margin:0 0 8px">${esc(h.xulosa || "")}</p>
+        <a href="${esc(h.fayl)}">To'liq hisobot →</a>
+      </article>`;
+                })
+                .join("")
+            : `<div class="card empty">Hisobotlar sprint yakunlanganda paydo bo'ladi</div>`;
+        }
+
+        function render() {
+          const d = state.data;
+          if (!state.sprint || !d.sprints.some((s) => s.id === state.sprint))
+            state.sprint = currentSprint(d.sprints)?.id || null;
+          $("#title").textContent = d.loyiha ? `${d.loyiha} — jarayon` : "Loyiha jarayoni";
+          const upd = new Date(d.yangilangan);
+          const hm = (n) => String(n).padStart(2, "0");
+          $("#updated").textContent =
+            `Sinxronlangan: ${upd.getDate()} ${OY[upd.getMonth()]} ${upd.getFullYear()}, ${hm(upd.getHours())}:${hm(upd.getMinutes())}`;
+          renderKpis();
+          renderGantt();
+          renderSprintList();
+          renderDetail();
+          renderDecisions();
+          renderReports();
+        }
+
+        // ---------- Hodisalar ----------
+        document.addEventListener("click", (e) => {
+          const sp = e.target.closest("[data-sprint]");
+          if (sp) {
+            state.sprint = sp.dataset.sprint;
+            state.filter = "barchasi";
+            history.replaceState(null, "", "#" + state.sprint);
+            render();
+            return;
+          }
+          const f = e.target.closest("[data-filter]");
+          if (f) {
+            state.filter = f.dataset.filter;
+            renderDetail();
+            return;
+          }
+          const t = e.target.closest("[data-tab]");
+          if (t) {
+            state.tab = t.dataset.tab;
+            document
+              .querySelectorAll(".tab")
+              .forEach((b) => b.setAttribute("aria-selected", b.dataset.tab === state.tab));
+            ["sprintlar", "qarorlar", "hisobotlar"].forEach((v) => ($("#v-" + v).hidden = v !== state.tab));
+          }
+        });
+        document.addEventListener("input", (e) => {
+          if (e.target.id !== "search") return;
+          state.q = e.target.value;
+          const pos = e.target.selectionStart;
+          renderDetail();
+          const inp = $("#search");
+          inp.focus();
+          inp.setSelectionRange(pos, pos);
+        });
+
+        // ---------- Ma'lumotni yuklash (file:// da ham ishlaydi) ----------
+        function load() {
+          return new Promise((resolve) => {
+            const el = document.createElement("script");
+            el.src = `${DATA_FILE}?t=${Date.now()}`;
+            el.onload = () => {
+              el.remove();
+              resolve(true);
+            };
+            el.onerror = () => {
+              el.remove();
+              resolve(false);
+            };
+            document.head.appendChild(el);
+          });
+        }
+        async function tick(first) {
+          const ok = await load();
+          $("#live").classList.toggle("stale", !ok);
+          if (!ok || !window.JARAYON) {
+            if (first) {
+              $("#error").hidden = false;
+              $("#error").innerHTML =
+                `<b>${DATA_FILE}</b> topilmadi. Loyiha ildizida <code>node scripts/jarayon-sync.mjs</code> buyrug'ini ishga tushiring.`;
+              $("#updated").textContent = "Ma'lumot yo'q";
+            }
+            return;
+          }
+          $("#error").hidden = true;
+          if (!state.data || state.data.yangilangan !== window.JARAYON.yangilangan) {
+            state.data = window.JARAYON;
+            render();
+          }
+        }
+        tick(true);
+        setInterval(tick, REFRESH_MS);
+      })();
+    </script>
+  </body>
+</html>

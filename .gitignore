@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.turbo/
+*.log
+.DS_Store
+
+# muhit va lokal ma'lumot
+.env
+.env.local
+data/*
+!data/.gitkeep
+
+# Claude job ish papkalari
+workspaces/

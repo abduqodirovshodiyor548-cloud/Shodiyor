@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "jarayon",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["/Users/jamshid/Documents/Loiha/Dashboard/scripts/serve.mjs"],
+      "port": 4173
+    }
+  ]
+}
