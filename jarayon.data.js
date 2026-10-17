@@ -1,6 +1,6 @@
 // Avtomatik yaratilgan: node scripts/jarayon-sync.mjs. Qo'lda tahrirlamang.
 window.JARAYON = {
-  "yangilangan": "2026-10-17T11:14:13.849Z",
+  "yangilangan": "2026-10-17T12:55:54.571Z",
   "loyiha": "Lokal AI Dashboard",
   "sprints": [
     {
@@ -155,9 +155,9 @@ window.JARAYON = {
         },
         {
           "id": "S1-02",
-          "title": "Davr mantiqi: yil/kvartal/oy/hafta/kun chegaralari (ISO hafta)",
+          "title": "Davr mantiqi: yil/kvartal/oy/hafta/kun chegaralari (ISO hafta) — `packages/shared/src/period.ts` va `period.test.ts`. Tekshirildi: `pnpm --filter @loiha/shared test` 15/15 sinov (9 suite) o'tdi; `pnpm typecheck` 7/7 muvaffaqiyatli; ESLint `._*` fayllarsiz 0 xato; Prettier manba fayllar toza. Qarorlar: Q-027…Q-029",
           "group": "Ma'lumot modeli",
-          "status": "rejalashtirilgan"
+          "status": "bajarildi"
         },
         {
           "id": "S1-03",
@@ -1117,6 +1117,37 @@ window.JARAYON = {
       "kontekst": "S1-01 doirasini toraytirish.",
       "qaror": "Teglar faqat vazifalar uchun (`task_tags`); nom `lower(name)` bo'yicha yagona. Takrorlanish (S1-04) va kalendar vaqt bloklari/eventId (S2) ustunlari ataylab qo'shilmadi — o'z vazifasida alohida migratsiya bilan.",
       "oqibat": "Maqsad teglari kerak bo'lsa keyin qo'shiladi."
+    },
+    {
+      "id": "Q-027",
+      "sarlavha": "Davr mantiqi @loiha/shared da, tashqi kutubxonasiz",
+      "sana": "2026-10-17",
+      "sprint": "S1 (S1-02)",
+      "status": "qabul qilingan",
+      "kontekst": "Davr chegaralariga web (UI ko'rinishlari), server (API filtrlari) va dashboard-mcp muhtoj.",
+      "qaror": "Mantiq `packages/shared/src/period.ts` da, `@loiha/shared` orqali eksport qilinadi — uchala iste'molchi bir xil chegaralardan foydalanadi. date-fns kabi kutubxona qo'shilmadi: kerakli mantiq kichik, Q-022 dagi vaqt zonasisiz YYYY-MM-DD uchun UTC arifmetikasi yetarli.",
+      "rad etilgan": "date-fns va shunga o'xshash tashqi kutubxona; har ilovada alohida mantiq.",
+      "oqibat": "S1-03, S1-06, S1-07…S1-09 va S1-12 shu moduldan foydalanadi."
+    },
+    {
+      "id": "Q-028",
+      "sarlavha": "periodKey faqat yordamchi, DB'da period_start/period_end",
+      "sana": "2026-10-17",
+      "sprint": "S1 (S1-02)",
+      "status": "qabul qilingan",
+      "kontekst": "\"2026-W42\" kabi kalit ko'rsatish, URL va MCP uchun qulay.",
+      "qaror": "`periodKey` / `parsePeriodKey` faqat ko'rsatish, URL va MCP uchun. DB'da Q-022 ga ko'ra hamon `period_start`/`period_end` saqlanadi.",
+      "oqibat": "Q-022 o'zgarmaydi; kalit saqlash ustuni qo'shilmaydi."
+    },
+    {
+      "id": "Q-029",
+      "sarlavha": "Sinov vositasi — node:test + tsx",
+      "sana": "2026-10-17",
+      "sprint": "S1 (S1-02)",
+      "status": "qabul qilingan",
+      "kontekst": "`packages/shared` da sinov vositasi yo'q edi.",
+      "qaror": "`node:test` + `tsx` (`\"test\": \"tsx --test src/*.test.ts\"`); root'da `turbo run test`, `turbo.json` ga `test` vazifasi. Yangi bog'liqlik yo'q (tsx root'da bor).",
+      "oqibat": "Sinovlar Node o'rnatilgandan keyin ishga tushirilishi kerak (hozircha ishga tushirilmagan)."
     }
   ],
   "hisobotlar": [

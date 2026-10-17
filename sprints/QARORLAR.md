@@ -224,3 +224,28 @@ Format (hisobotchi agent va sinxron skript shunga tayanadi):
 - **Kontekst:** S1-01 doirasini toraytirish.
 - **Qaror:** Teglar faqat vazifalar uchun (`task_tags`); nom `lower(name)` bo'yicha yagona. Takrorlanish (S1-04) va kalendar vaqt bloklari/eventId (S2) ustunlari ataylab qo'shilmadi — o'z vazifasida alohida migratsiya bilan.
 - **Oqibat:** Maqsad teglari kerak bo'lsa keyin qo'shiladi.
+
+## Q-027: Davr mantiqi @loiha/shared da, tashqi kutubxonasiz
+- **Sana:** 2026-10-17
+- **Sprint:** S1 (S1-02)
+- **Status:** qabul qilingan
+- **Kontekst:** Davr chegaralariga web (UI ko'rinishlari), server (API filtrlari) va dashboard-mcp muhtoj.
+- **Qaror:** Mantiq `packages/shared/src/period.ts` da, `@loiha/shared` orqali eksport qilinadi — uchala iste'molchi bir xil chegaralardan foydalanadi. date-fns kabi kutubxona qo'shilmadi: kerakli mantiq kichik, Q-022 dagi vaqt zonasisiz YYYY-MM-DD uchun UTC arifmetikasi yetarli.
+- **Rad etilgan:** date-fns va shunga o'xshash tashqi kutubxona; har ilovada alohida mantiq.
+- **Oqibat:** S1-03, S1-06, S1-07…S1-09 va S1-12 shu moduldan foydalanadi.
+
+## Q-028: periodKey faqat yordamchi, DB'da period_start/period_end
+- **Sana:** 2026-10-17
+- **Sprint:** S1 (S1-02)
+- **Status:** qabul qilingan
+- **Kontekst:** "2026-W42" kabi kalit ko'rsatish, URL va MCP uchun qulay.
+- **Qaror:** `periodKey` / `parsePeriodKey` faqat ko'rsatish, URL va MCP uchun. DB'da Q-022 ga ko'ra hamon `period_start`/`period_end` saqlanadi.
+- **Oqibat:** Q-022 o'zgarmaydi; kalit saqlash ustuni qo'shilmaydi.
+
+## Q-029: Sinov vositasi — node:test + tsx
+- **Sana:** 2026-10-17
+- **Sprint:** S1 (S1-02)
+- **Status:** qabul qilingan
+- **Kontekst:** `packages/shared` da sinov vositasi yo'q edi.
+- **Qaror:** `node:test` + `tsx` (`"test": "tsx --test src/*.test.ts"`); root'da `turbo run test`, `turbo.json` ga `test` vazifasi. Yangi bog'liqlik yo'q (tsx root'da bor).
+- **Oqibat:** Sinovlar Node o'rnatilgandan keyin ishga tushirilishi kerak (hozircha ishga tushirilmagan).

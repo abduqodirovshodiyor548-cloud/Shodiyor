@@ -16,7 +16,7 @@ Yillik → kvartal → oylik → haftalik → kunlik darajadagi maqsad va vazifa
 
 ### Ma'lumot modeli
 - [x] **S1-01** Jadvallar: `goals` (daraja, ota maqsad, davr), `key_results`, `tasks`, `tags` — migratsiya `packages/db/drizzle/0001_s1_goals_tasks.sql`, 15 sinov o'tdi (default, UUID, CHECK, FK, kaskad/set null, updated_at); typecheck/lint/prettier toza. Qarorlar: Q-022…Q-026
-- [ ] **S1-02** Davr mantiqi: yil/kvartal/oy/hafta/kun chegaralari (ISO hafta)
+- [x] **S1-02** Davr mantiqi: yil/kvartal/oy/hafta/kun chegaralari (ISO hafta) — `packages/shared/src/period.ts` va `period.test.ts`. Tekshirildi: `pnpm --filter @loiha/shared test` 15/15 sinov (9 suite) o'tdi; `pnpm typecheck` 7/7 muvaffaqiyatli; ESLint `._*` fayllarsiz 0 xato; Prettier manba fayllar toza. Qarorlar: Q-027…Q-029
 - [ ] **S1-03** Progress hisoblash: vazifalardan key result'ga, undan maqsadlarga yuqoriga yig'ilish
 - [ ] **S1-04** Takrorlanuvchi vazifalar (kunlik, haftalik, maxsus qoida)
 
@@ -45,3 +45,5 @@ Yillik → kvartal → oylik → haftalik → kunlik darajadagi maqsad va vazifa
 ## Xavflar
 - Ierarxiya juda murakkablashib ketishi mumkin → avval minimal model, keyin kengaytirish
 - Jarayon: vibecoding plugin commit hook'i `.vibecoding/hisobot-ok` tasdiq faylini talab qiladi (gitignore'da); S0 commit'ida hujjatlar hisobotchi tomonidan yangilangani uchun fayl qo'lda yaratilgan
+- Muhit (hal qilindi): Windows mashinaga Node.js 24.20.0 LTS (winget) va pnpm 12.11.2 (npm global) o'rnatildi, `pnpm install --frozen-lockfile` bilan node_modules Windows uchun qayta yig'ildi (`engines.node >=22.12` — mos)
+- Muhit (hal qilindi, 2026-10-17): repoda macOS'dan qolgan AppleDouble `._*` fayllari `pnpm lint` (33 parsing xatosi) va `jarayon-sync` ni buzardi. Foydalanuvchi ruxsati bilan 551 ta `._*` fayl o'chirildi (hammasi `00 05 16 07` sarlavhasi bilan tekshirildi; 271 tasi `.git` ichida edi, `git fsck` toza). Natija: `pnpm lint` 0 xato, `pnpm format:check` toza, sync muvaffaqiyatli
