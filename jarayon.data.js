@@ -1,6 +1,6 @@
 // Avtomatik yaratilgan: node scripts/jarayon-sync.mjs. Qo'lda tahrirlamang.
 window.JARAYON = {
-  "yangilangan": "2026-10-17T11:05:22.172Z",
+  "yangilangan": "2026-10-17T11:14:13.849Z",
   "loyiha": "Lokal AI Dashboard",
   "sprints": [
     {
@@ -126,9 +126,9 @@ window.JARAYON = {
     {
       "id": "S1",
       "nomi": "Maqsadlar va vazifalar tizimi",
-      "status": "rejalashtirilgan",
-      "boshlanish": "2026-10-26",
-      "tugash": "2026-11-06",
+      "status": "jarayonda",
+      "boshlanish": "2026-10-17",
+      "tugash": "2026-10-30",
       "davomiylik": "2 hafta",
       "fayl": "sprints/sprint-01-maqsadlar.md",
       "maqsad": "Yillik → kvartal → oylik → haftalik → kunlik darajadagi maqsad va vazifalar tizimini qo'lda to'liq boshqarish imkoniyati. Claude bu ma'lumotlar bilan MCP orqali ishlay oladi.",
@@ -149,9 +149,9 @@ window.JARAYON = {
       "tasks": [
         {
           "id": "S1-01",
-          "title": "Jadvallar: `goals` (daraja, ota maqsad, davr), `key_results`, `tasks`, `tags`",
+          "title": "Jadvallar: `goals` (daraja, ota maqsad, davr), `key_results`, `tasks`, `tags` — migratsiya `packages/db/drizzle/0001_s1_goals_tasks.sql`, 15 sinov o'tdi (default, UUID, CHECK, FK, kaskad/set null, updated_at); typecheck/lint/prettier toza. Qarorlar: Q-022…Q-026",
           "group": "Ma'lumot modeli",
-          "status": "rejalashtirilgan"
+          "status": "bajarildi"
         },
         {
           "id": "S1-02",
@@ -1056,6 +1056,67 @@ window.JARAYON = {
       "kontekst": "Repo bo'sh edi, branch ochish uchun asos yo'q edi.",
       "qaror": "Boshlang'ich commit (`aa65b29`) to'g'ridan-to'g'ri `main` ga qilindi.",
       "oqibat": "Keyingi ishlar (S1 dan boshlab) alohida branch'larda olib boriladi."
+    },
+    {
+      "id": "Q-021",
+      "sarlavha": "S1 rejadan 9 kun oldin boshlandi",
+      "sana": "2026-10-17",
+      "sprint": "S1",
+      "status": "qabul qilingan",
+      "kontekst": "S0 2026-10-17 da yakunlandi (rejadagi 2026-10-22 dan oldin). S1 rejada 2026-10-26 da boshlanishi kerak edi.",
+      "qaror": "Foydalanuvchi darhol davom etishni tanladi: S1 2026-10-17 da boshlandi, tugash 2026-10-30 (2 hafta).",
+      "oqibat": "S2…S9 sanalari hozircha o'zgartirilmaydi, S1 yakunida qayta ko'rib chiqiladi. Q-020 ga muvofiq S1 ishlari `sprint-01` branch'ida olib boriladi (`main` dan `2cd992e` commit'idan ochilgan)."
+    },
+    {
+      "id": "Q-022",
+      "sarlavha": "Maqsad darajalari va davr saqlash",
+      "sana": "2026-10-17",
+      "sprint": "S1 (S1-01)",
+      "status": "qabul qilingan",
+      "kontekst": "Ierarxiyani minimal tutish kerak (S1 xavfi); turli darajalar bo'yicha kesishish so'rovlari oddiy bo'lishi kerak.",
+      "qaror": "Maqsad darajalari faqat `year/quarter/month/week`; kunlik daraja — vazifalar (kunlik \"maqsad\" amalda vazifa). Davr `period_start`/`period_end` (YYYY-MM-DD matn, ikkalasi ham kiradi) sifatida saqlanadi, \"2026-W42\" kabi kalit emas. Sanalar vaqt zonasisiz lokal kalendar kuni.",
+      "rad etilgan": "kunlik maqsad darajasi; davr kaliti (\"2026-W42\").",
+      "oqibat": "Chegaralar S1-02 da hisoblanadi."
+    },
+    {
+      "id": "Q-023",
+      "sarlavha": "Vazifa rejasi plan_level + plan_start",
+      "sana": "2026-10-17",
+      "sprint": "S1 (S1-01)",
+      "status": "qabul qilingan",
+      "kontekst": "Kun belgilanmagan \"shu hafta/oy\" vazifalari kerak.",
+      "qaror": "`tasks` da `plan_level` (day/week/month) + `plan_start` juftligi. CHECK: ikkalasi birga null yoki birga to'ldirilgan.",
+      "oqibat": "S1-10 drag-and-drop shunga tayanadi."
+    },
+    {
+      "id": "Q-024",
+      "sarlavha": "O'chirish siyosati",
+      "sana": "2026-10-17",
+      "sprint": "S1 (S1-01)",
+      "status": "qabul qilingan",
+      "kontekst": "O'chirishda vazifalar yo'qolmasligi kerak.",
+      "qaror": "goal → key_results CASCADE; goal/KR → tasks SET NULL; ota goal → bola goal SET NULL; task/tag → task_tags CASCADE.",
+      "oqibat": "Maqsad o'chirilsa vazifalar \"bog'lanmagan\" bo'lib qoladi."
+    },
+    {
+      "id": "Q-025",
+      "sarlavha": "progress kesh ustun sifatida",
+      "sana": "2026-10-17",
+      "sprint": "S1 (S1-01)",
+      "status": "qabul qilingan",
+      "kontekst": "Ierarxik progress har so'rovda hisoblanmasligi kerak.",
+      "qaror": "`progress` (0…1) `goals` va `key_results` da kesh ustun; S1-03 yangilaydi. KR uchun: `target_value` bo'lsa raqamdan, bo'lmasa vazifalardan.",
+      "oqibat": "Kesh eskirmasligi uchun S1-03 o'zgarishlarda qayta hisoblashi shart."
+    },
+    {
+      "id": "Q-026",
+      "sarlavha": "Teglar doirasi va keyinga qoldirilgan ustunlar",
+      "sana": "2026-10-17",
+      "sprint": "S1 (S1-01)",
+      "status": "qabul qilingan",
+      "kontekst": "S1-01 doirasini toraytirish.",
+      "qaror": "Teglar faqat vazifalar uchun (`task_tags`); nom `lower(name)` bo'yicha yagona. Takrorlanish (S1-04) va kalendar vaqt bloklari/eventId (S2) ustunlari ataylab qo'shilmadi — o'z vazifasida alohida migratsiya bilan.",
+      "oqibat": "Maqsad teglari kerak bo'lsa keyin qo'shiladi."
     }
   ],
   "hisobotlar": [

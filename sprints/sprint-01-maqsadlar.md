@@ -1,9 +1,9 @@
 ---
 id: S1
 nomi: Maqsadlar va vazifalar tizimi
-status: rejalashtirilgan
-boshlanish: 2026-10-26
-tugash: 2026-11-06
+status: jarayonda
+boshlanish: 2026-10-17
+tugash: 2026-10-30
 davomiylik: 2 hafta
 ---
 
@@ -15,7 +15,7 @@ Yillik → kvartal → oylik → haftalik → kunlik darajadagi maqsad va vazifa
 ## Vazifalar
 
 ### Ma'lumot modeli
-- [ ] **S1-01** Jadvallar: `goals` (daraja, ota maqsad, davr), `key_results`, `tasks`, `tags`
+- [x] **S1-01** Jadvallar: `goals` (daraja, ota maqsad, davr), `key_results`, `tasks`, `tags` — migratsiya `packages/db/drizzle/0001_s1_goals_tasks.sql`, 15 sinov o'tdi (default, UUID, CHECK, FK, kaskad/set null, updated_at); typecheck/lint/prettier toza. Qarorlar: Q-022…Q-026
 - [ ] **S1-02** Davr mantiqi: yil/kvartal/oy/hafta/kun chegaralari (ISO hafta)
 - [ ] **S1-03** Progress hisoblash: vazifalardan key result'ga, undan maqsadlarga yuqoriga yig'ilish
 - [ ] **S1-04** Takrorlanuvchi vazifalar (kunlik, haftalik, maxsus qoida)
@@ -44,3 +44,4 @@ Yillik → kvartal → oylik → haftalik → kunlik darajadagi maqsad va vazifa
 
 ## Xavflar
 - Ierarxiya juda murakkablashib ketishi mumkin → avval minimal model, keyin kengaytirish
+- Jarayon: vibecoding plugin commit hook'i `.vibecoding/hisobot-ok` tasdiq faylini talab qiladi (gitignore'da); S0 commit'ida hujjatlar hisobotchi tomonidan yangilangani uchun fayl qo'lda yaratilgan

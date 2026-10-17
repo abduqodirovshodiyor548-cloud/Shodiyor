@@ -175,3 +175,52 @@ Format (hisobotchi agent va sinxron skript shunga tayanadi):
 - **Kontekst:** Repo bo'sh edi, branch ochish uchun asos yo'q edi.
 - **Qaror:** Boshlang'ich commit (`aa65b29`) to'g'ridan-to'g'ri `main` ga qilindi.
 - **Oqibat:** Keyingi ishlar (S1 dan boshlab) alohida branch'larda olib boriladi.
+
+## Q-021: S1 rejadan 9 kun oldin boshlandi
+- **Sana:** 2026-10-17
+- **Sprint:** S1
+- **Status:** qabul qilingan
+- **Kontekst:** S0 2026-10-17 da yakunlandi (rejadagi 2026-10-22 dan oldin). S1 rejada 2026-10-26 da boshlanishi kerak edi.
+- **Qaror:** Foydalanuvchi darhol davom etishni tanladi: S1 2026-10-17 da boshlandi, tugash 2026-10-30 (2 hafta).
+- **Oqibat:** S2…S9 sanalari hozircha o'zgartirilmaydi, S1 yakunida qayta ko'rib chiqiladi. Q-020 ga muvofiq S1 ishlari `sprint-01` branch'ida olib boriladi (`main` dan `2cd992e` commit'idan ochilgan).
+
+## Q-022: Maqsad darajalari va davr saqlash
+- **Sana:** 2026-10-17
+- **Sprint:** S1 (S1-01)
+- **Status:** qabul qilingan
+- **Kontekst:** Ierarxiyani minimal tutish kerak (S1 xavfi); turli darajalar bo'yicha kesishish so'rovlari oddiy bo'lishi kerak.
+- **Qaror:** Maqsad darajalari faqat `year/quarter/month/week`; kunlik daraja — vazifalar (kunlik "maqsad" amalda vazifa). Davr `period_start`/`period_end` (YYYY-MM-DD matn, ikkalasi ham kiradi) sifatida saqlanadi, "2026-W42" kabi kalit emas. Sanalar vaqt zonasisiz lokal kalendar kuni.
+- **Rad etilgan:** kunlik maqsad darajasi; davr kaliti ("2026-W42").
+- **Oqibat:** Chegaralar S1-02 da hisoblanadi.
+
+## Q-023: Vazifa rejasi plan_level + plan_start
+- **Sana:** 2026-10-17
+- **Sprint:** S1 (S1-01)
+- **Status:** qabul qilingan
+- **Kontekst:** Kun belgilanmagan "shu hafta/oy" vazifalari kerak.
+- **Qaror:** `tasks` da `plan_level` (day/week/month) + `plan_start` juftligi. CHECK: ikkalasi birga null yoki birga to'ldirilgan.
+- **Oqibat:** S1-10 drag-and-drop shunga tayanadi.
+
+## Q-024: O'chirish siyosati
+- **Sana:** 2026-10-17
+- **Sprint:** S1 (S1-01)
+- **Status:** qabul qilingan
+- **Kontekst:** O'chirishda vazifalar yo'qolmasligi kerak.
+- **Qaror:** goal → key_results CASCADE; goal/KR → tasks SET NULL; ota goal → bola goal SET NULL; task/tag → task_tags CASCADE.
+- **Oqibat:** Maqsad o'chirilsa vazifalar "bog'lanmagan" bo'lib qoladi.
+
+## Q-025: progress kesh ustun sifatida
+- **Sana:** 2026-10-17
+- **Sprint:** S1 (S1-01)
+- **Status:** qabul qilingan
+- **Kontekst:** Ierarxik progress har so'rovda hisoblanmasligi kerak.
+- **Qaror:** `progress` (0…1) `goals` va `key_results` da kesh ustun; S1-03 yangilaydi. KR uchun: `target_value` bo'lsa raqamdan, bo'lmasa vazifalardan.
+- **Oqibat:** Kesh eskirmasligi uchun S1-03 o'zgarishlarda qayta hisoblashi shart.
+
+## Q-026: Teglar doirasi va keyinga qoldirilgan ustunlar
+- **Sana:** 2026-10-17
+- **Sprint:** S1 (S1-01)
+- **Status:** qabul qilingan
+- **Kontekst:** S1-01 doirasini toraytirish.
+- **Qaror:** Teglar faqat vazifalar uchun (`task_tags`); nom `lower(name)` bo'yicha yagona. Takrorlanish (S1-04) va kalendar vaqt bloklari/eventId (S2) ustunlari ataylab qo'shilmadi — o'z vazifasida alohida migratsiya bilan.
+- **Oqibat:** Maqsad teglari kerak bo'lsa keyin qo'shiladi.
