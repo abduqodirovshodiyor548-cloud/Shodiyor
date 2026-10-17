@@ -249,3 +249,29 @@ Format (hisobotchi agent va sinxron skript shunga tayanadi):
 - **Kontekst:** `packages/shared` da sinov vositasi yo'q edi.
 - **Qaror:** `node:test` + `tsx` (`"test": "tsx --test src/*.test.ts"`); root'da `turbo run test`, `turbo.json` ga `test` vazifasi. Yangi bog'liqlik yo'q (tsx root'da bor).
 - **Oqibat:** Sinovlar Node o'rnatilgandan keyin ishga tushirilishi kerak (hozircha ishga tushirilmagan).
+
+## Q-030: Maqsad progressi formulasi
+- **Sana:** 2026-10-17
+- **Sprint:** S1 (S1-03)
+- **Status:** qabul qilingan
+- **Kontekst:** Maqsad progressi KR, bola maqsad va vazifalardan yig'ilishi kerak (Q-025).
+- **Qaror:** Qismlar: KR'lar, `dropped` bo'lmagan bola maqsadlar va to'g'ridan-to'g'ri (KR'siz) vazifalar ulushi — teng vaznli o'rtacha. To'g'ridan-to'g'ri vazifalar bitta qism hisoblanadi (aks holda ko'p mayda vazifa KR'larni "bosib ketadi"). `done` maqsad — 1; qism yo'q bo'lsa — 0. `cancelled` vazifalar hisobga olinmaydi. KR'ga bog'langan vazifa faqat KR orqali sanaladi (ikki marta emas). Raqamli KR kamayuvchi maqsadni ham qo'llaydi (masalan 80 → 70), natija 0…1 ga qisiladi; start = target bo'lsa current = target → 1.
+- **Rad etilgan:** vazifalar soniga qarab vaznlash; KR'larga qo'lda vazn berish (kerak bo'lsa keyin alohida ustun bilan).
+- **Oqibat:** Q-025 ni to'ldiradi.
+
+## Q-031: Kesh ilova kodidagi recompute* bilan yangilanadi, trigger bilan emas
+- **Sana:** 2026-10-17
+- **Sprint:** S1 (S1-03)
+- **Status:** qabul qilingan
+- **Kontekst:** Q-025 keshni S1-03 yangilashini aytgan, usuli aniqlanmagan edi.
+- **Qaror:** SQL trigger o'rniga aniq `recompute*` chaqiruvlari. Sabab: formula TypeScript'da bitta joyda (shared), sinash oson, UI ham shu formuladan foydalana oladi. `recomputeAllProgress` — tiklash/tekshiruv uchun.
+- **Rad etilgan:** SQL trigger'lar.
+- **Oqibat:** S1-05 (CRUD API) va S1-12 (MCP) har bir yozishdan keyin tegishli `recompute*` ni o'sha tranzaksiyada chaqirishi SHART. DoD dagi "progress avtomatik yangilanadi" mezoni S1-05 bilan to'liq yopiladi.
+
+## Q-032: Formulalar @loiha/shared da, kesh yozish @loiha/db da (db → shared bog'liqlik)
+- **Sana:** 2026-10-17
+- **Sprint:** S1 (S1-03)
+- **Status:** qabul qilingan
+- **Kontekst:** Formula DB'siz sinalishi va UI/serverda qayta ishlatilishi kerak (Q-027 bilan bir xil yondashuv).
+- **Qaror:** taskCompletion, keyResultProgress, goalProgress, clamp01 — `@loiha/shared`; kesh yozish — `@loiha/db`. Shu sababli `@loiha/db` ga `@loiha/shared` workspace dependency qo'shildi, db paketiga `test` skripti qo'shildi.
+- **Oqibat:** pnpm-lock.yaml yangilandi.

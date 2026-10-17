@@ -76,3 +76,4 @@ export interface JobEventDto {
 }
 
 export * from "./period.ts";
+export * from "./progress.ts";

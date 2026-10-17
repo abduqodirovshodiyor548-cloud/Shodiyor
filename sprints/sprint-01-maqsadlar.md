@@ -17,7 +17,7 @@ Yillik → kvartal → oylik → haftalik → kunlik darajadagi maqsad va vazifa
 ### Ma'lumot modeli
 - [x] **S1-01** Jadvallar: `goals` (daraja, ota maqsad, davr), `key_results`, `tasks`, `tags` — migratsiya `packages/db/drizzle/0001_s1_goals_tasks.sql`, 15 sinov o'tdi (default, UUID, CHECK, FK, kaskad/set null, updated_at); typecheck/lint/prettier toza. Qarorlar: Q-022…Q-026
 - [x] **S1-02** Davr mantiqi: yil/kvartal/oy/hafta/kun chegaralari (ISO hafta) — `packages/shared/src/period.ts` va `period.test.ts`. Tekshirildi: `pnpm --filter @loiha/shared test` 15/15 sinov (9 suite) o'tdi; `pnpm typecheck` 7/7 muvaffaqiyatli; ESLint `._*` fayllarsiz 0 xato; Prettier manba fayllar toza. Qarorlar: Q-027…Q-029
-- [ ] **S1-03** Progress hisoblash: vazifalardan key result'ga, undan maqsadlarga yuqoriga yig'ilish
+- [x] **S1-03** Progress hisoblash: vazifalardan key result'ga, undan maqsadlarga yuqoriga yig'ilish — formulalar `packages/shared/src/progress.ts`, kesh yangilash `packages/db/src/progress.ts` (recomputeKeyResult/GoalUpwards/FromKeyResult/ForTask/AllProgress, sikllardan himoyalangan). Tekshirildi: shared 26/26, db 5/5 sinov; typecheck 7/7; lint 0 xato; format toza. Eslatma: S1-05 va S1-12 har yozishdan keyin `recompute*` ni chaqirishi shart. Qarorlar: Q-030…Q-032
 - [ ] **S1-04** Takrorlanuvchi vazifalar (kunlik, haftalik, maxsus qoida)
 
 ### API

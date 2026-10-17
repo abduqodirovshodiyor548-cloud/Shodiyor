@@ -8,6 +8,7 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
+    "test": "tsx --test src/*.test.ts",
     "generate": "drizzle-kit generate",
     "migrate": "tsx src/migrate.ts"
   },
@@ -18,6 +19,7 @@
   },
   "dependencies": {
     "@loiha/config": "workspace:*",
+    "@loiha/shared": "workspace:*",
     "better-sqlite3": "^13.0.3",
     "drizzle-orm": "^0.45.4"
   }

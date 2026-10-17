@@ -1,6 +1,6 @@
 // Avtomatik yaratilgan: node scripts/jarayon-sync.mjs. Qo'lda tahrirlamang.
 window.JARAYON = {
-  "yangilangan": "2026-10-17T12:55:54.571Z",
+  "yangilangan": "2026-10-17T13:37:29.430Z",
   "loyiha": "Lokal AI Dashboard",
   "sprints": [
     {
@@ -161,9 +161,9 @@ window.JARAYON = {
         },
         {
           "id": "S1-03",
-          "title": "Progress hisoblash: vazifalardan key result'ga, undan maqsadlarga yuqoriga yig'ilish",
+          "title": "Progress hisoblash: vazifalardan key result'ga, undan maqsadlarga yuqoriga yig'ilish — formulalar `packages/shared/src/progress.ts`, kesh yangilash `packages/db/src/progress.ts` (recomputeKeyResult/GoalUpwards/FromKeyResult/ForTask/AllProgress, sikllardan himoyalangan). Tekshirildi: shared 26/26, db 5/5 sinov; typecheck 7/7; lint 0 xato; format toza. Eslatma: S1-05 va S1-12 har yozishdan keyin `recompute*` ni chaqirishi shart. Qarorlar: Q-030…Q-032",
           "group": "Ma'lumot modeli",
-          "status": "rejalashtirilgan"
+          "status": "bajarildi"
         },
         {
           "id": "S1-04",
@@ -1148,6 +1148,38 @@ window.JARAYON = {
       "kontekst": "`packages/shared` da sinov vositasi yo'q edi.",
       "qaror": "`node:test` + `tsx` (`\"test\": \"tsx --test src/*.test.ts\"`); root'da `turbo run test`, `turbo.json` ga `test` vazifasi. Yangi bog'liqlik yo'q (tsx root'da bor).",
       "oqibat": "Sinovlar Node o'rnatilgandan keyin ishga tushirilishi kerak (hozircha ishga tushirilmagan)."
+    },
+    {
+      "id": "Q-030",
+      "sarlavha": "Maqsad progressi formulasi",
+      "sana": "2026-10-17",
+      "sprint": "S1 (S1-03)",
+      "status": "qabul qilingan",
+      "kontekst": "Maqsad progressi KR, bola maqsad va vazifalardan yig'ilishi kerak (Q-025).",
+      "qaror": "Qismlar: KR'lar, `dropped` bo'lmagan bola maqsadlar va to'g'ridan-to'g'ri (KR'siz) vazifalar ulushi — teng vaznli o'rtacha. To'g'ridan-to'g'ri vazifalar bitta qism hisoblanadi (aks holda ko'p mayda vazifa KR'larni \"bosib ketadi\"). `done` maqsad — 1; qism yo'q bo'lsa — 0. `cancelled` vazifalar hisobga olinmaydi. KR'ga bog'langan vazifa faqat KR orqali sanaladi (ikki marta emas). Raqamli KR kamayuvchi maqsadni ham qo'llaydi (masalan 80 → 70), natija 0…1 ga qisiladi; start = target bo'lsa current = target → 1.",
+      "rad etilgan": "vazifalar soniga qarab vaznlash; KR'larga qo'lda vazn berish (kerak bo'lsa keyin alohida ustun bilan).",
+      "oqibat": "Q-025 ni to'ldiradi."
+    },
+    {
+      "id": "Q-031",
+      "sarlavha": "Kesh ilova kodidagi recompute* bilan yangilanadi, trigger bilan emas",
+      "sana": "2026-10-17",
+      "sprint": "S1 (S1-03)",
+      "status": "qabul qilingan",
+      "kontekst": "Q-025 keshni S1-03 yangilashini aytgan, usuli aniqlanmagan edi.",
+      "qaror": "SQL trigger o'rniga aniq `recompute*` chaqiruvlari. Sabab: formula TypeScript'da bitta joyda (shared), sinash oson, UI ham shu formuladan foydalana oladi. `recomputeAllProgress` — tiklash/tekshiruv uchun.",
+      "rad etilgan": "SQL trigger'lar.",
+      "oqibat": "S1-05 (CRUD API) va S1-12 (MCP) har bir yozishdan keyin tegishli `recompute*` ni o'sha tranzaksiyada chaqirishi SHART. DoD dagi \"progress avtomatik yangilanadi\" mezoni S1-05 bilan to'liq yopiladi."
+    },
+    {
+      "id": "Q-032",
+      "sarlavha": "Formulalar @loiha/shared da, kesh yozish @loiha/db da (db → shared bog'liqlik)",
+      "sana": "2026-10-17",
+      "sprint": "S1 (S1-03)",
+      "status": "qabul qilingan",
+      "kontekst": "Formula DB'siz sinalishi va UI/serverda qayta ishlatilishi kerak (Q-027 bilan bir xil yondashuv).",
+      "qaror": "taskCompletion, keyResultProgress, goalProgress, clamp01 — `@loiha/shared`; kesh yozish — `@loiha/db`. Shu sababli `@loiha/db` ga `@loiha/shared` workspace dependency qo'shildi, db paketiga `test` skripti qo'shildi.",
+      "oqibat": "pnpm-lock.yaml yangilandi."
     }
   ],
   "hisobotlar": [
