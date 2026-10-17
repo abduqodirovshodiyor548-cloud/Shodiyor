@@ -1,14 +1,14 @@
 // Avtomatik yaratilgan: node scripts/jarayon-sync.mjs. Qo'lda tahrirlamang.
 window.JARAYON = {
-  "yangilangan": "2026-10-15T14:54:20.390Z",
+  "yangilangan": "2026-10-17T11:05:22.172Z",
   "loyiha": "Lokal AI Dashboard",
   "sprints": [
     {
       "id": "S0",
       "nomi": "Poydevor",
-      "status": "jarayonda",
+      "status": "yakunlangan",
       "boshlanish": "2026-10-15",
-      "tugash": "2026-10-22",
+      "tugash": "2026-10-17",
       "davomiylik": "1 hafta",
       "fayl": "sprints/sprint-00-poydevor.md",
       "maqsad": "Barcha keyingi modullar quriladigan texnik asosni tayyorlash: monorepo, ma'lumotlar bazasi, UI qobig'i va Claude CLI orqali AI chaqiruvlarini bajaradigan runner.",
@@ -18,15 +18,15 @@ window.JARAYON = {
           "done": true
         },
         {
-          "text": "UI'dan yuborilgan prompt Claude CLI orqali bajariladi va javob oqim bo'lib ko'rinadi — izoh: zanjir to'liq ishladi, Claude javobi 401 auth xatosi bo'ldi; jonli oqim echo job bilan tasdiqlandi",
+          "text": "UI'dan yuborilgan prompt Claude CLI orqali bajariladi va javob oqim bo'lib ko'rinadi — izoh (2026-10-17): real Claude javobi server API (POST /api/jobs/claude + SSE /events) orqali oqim bo'lib keldi (39 ta text_delta). Brauzerdagi AI konsol sahifasi orqali real Claude bilan alohida qayta sinalmagan, lekin u bir xil endpoint'lardan foydalanadi va SSE oldin brauzerda echo job bilan tasdiqlangan",
           "done": true
         },
         {
-          "text": "Claude dashboard-mcp'dagi `ping` tool'ini chaqira oladi — bloker: Claude CLI login (`claude` → `/login`); MCP `connected`, tool ro'yxatida mcp__dashboard__ping bor",
-          "done": false
+          "text": "Claude dashboard-mcp'dagi `ping` tool'ini chaqira oladi — izoh (2026-10-17): POST /api/jobs/claude orqali tekshirildi; init hodisasida mcpServers dashboard=connected, tools=[mcp__dashboard__ping]; Claude mcp__dashboard__ping ni chaqirdi, tool_result {\"pong\":true,...}, job succeeded (job 1598b6df…, $0.032, 12.6s)",
+          "done": true
         },
         {
-          "text": "Job bekor qilinsa, CLI jarayoni to'xtaydi — izoh: bekor qilish navbat darajasida sinaldi (echo); Claude jarayoniga SIGTERM→SIGKILL kodi bor, haqiqiy uzun Claude job bilan sinalmagan",
+          "text": "Job bekor qilinsa, CLI jarayoni to'xtaydi — izoh: haqiqiy uzun Claude job bilan sinaldi (2026-10-17) — cancel'dan oldin 1 ta `claude -p` jarayoni bor edi, cancel'dan 5s keyin 0 ta; job status cancelled (avval navbat darajasida echo bilan ham sinalgan)",
           "done": true
         }
       ],
@@ -51,7 +51,7 @@ window.JARAYON = {
         },
         {
           "id": "S0-04",
-          "title": "Git repo, `.gitignore`, `pnpm dev` bilan barcha ilovalarni bir vaqtda ishga tushirish — izoh: git commit hali qilinmagan, foydalanuvchi qaroriga qoldirildi",
+          "title": "Git repo, `.gitignore`, `pnpm dev` bilan barcha ilovalarni bir vaqtda ishga tushirish — izoh: boshlang'ich commit qilindi — `aa65b29` (main), 2026-10-15",
           "group": "Monorepo va infratuzilma",
           "status": "bajarildi"
         },
@@ -87,7 +87,7 @@ window.JARAYON = {
         },
         {
           "id": "S0-10",
-          "title": "Stream-json parser va SSE orqali brauzerga jonli uzatish — izoh: SSE brauzerda tekshirildi; haqiqiy Claude tool_use/tool_result parse qilinishi hali ko'rilmagan (auth)",
+          "title": "Stream-json parser va SSE orqali brauzerga jonli uzatish — izoh: SSE brauzerda tekshirildi; real Claude bilan tool_use va tool_result parse qilinishi tasdiqlandi (2026-10-17); text_delta oqimi ham tasdiqlandi (qisqa job'da 39 ta text_delta SSE orqali keldi)",
           "group": "Claude runner",
           "status": "bajarildi"
         },
@@ -1046,7 +1046,25 @@ window.JARAYON = {
       "kontekst": "Lokal ilova, tashqi kirish kerak emas.",
       "qaror": "Web (5173) va server (4310) faqat 127.0.0.1 da; brauzer serverga Vite `/api` proksi orqali murojaat qiladi.",
       "oqibat": "CORS kerak emas. Q-014 ni to'ldiradi."
+    },
+    {
+      "id": "Q-020",
+      "sarlavha": "Boshlang'ich commit to'g'ridan-to'g'ri main ga",
+      "sana": "2026-10-15",
+      "sprint": "S0",
+      "status": "qabul qilingan",
+      "kontekst": "Repo bo'sh edi, branch ochish uchun asos yo'q edi.",
+      "qaror": "Boshlang'ich commit (`aa65b29`) to'g'ridan-to'g'ri `main` ga qilindi.",
+      "oqibat": "Keyingi ishlar (S1 dan boshlab) alohida branch'larda olib boriladi."
     }
   ],
-  "hisobotlar": []
+  "hisobotlar": [
+    {
+      "sprint": "S0",
+      "sana": "2026-10-17",
+      "status": "yakunlangan",
+      "fayl": "sprints/hisobotlar/sprint-00-hisobot.md",
+      "xulosa": "Maqsadga erishildi: monorepo, SQLite/Drizzle, Hono server, job navbati, Claude CLI runner (stream-json + SSE), dashboard-mcp skeleti va web UI (AI konsol) tayyor. Barcha 15 vazifa va 4/4 qabul mezoni bajarildi. Sprint rejadagi 2026-10-22 o'rniga 2026-10-17 da yakunlandi (5 kun oldin). Bitta bloker (Claude CLI 401 login) bo'ldi va yechildi."
+    }
+  ]
 };

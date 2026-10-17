@@ -167,3 +167,11 @@ Format (hisobotchi agent va sinxron skript shunga tayanadi):
 - **Kontekst:** Lokal ilova, tashqi kirish kerak emas.
 - **Qaror:** Web (5173) va server (4310) faqat 127.0.0.1 da; brauzer serverga Vite `/api` proksi orqali murojaat qiladi.
 - **Oqibat:** CORS kerak emas. Q-014 ni to'ldiradi.
+
+## Q-020: Boshlang'ich commit to'g'ridan-to'g'ri main ga
+- **Sana:** 2026-10-15
+- **Sprint:** S0
+- **Status:** qabul qilingan
+- **Kontekst:** Repo bo'sh edi, branch ochish uchun asos yo'q edi.
+- **Qaror:** Boshlang'ich commit (`aa65b29`) to'g'ridan-to'g'ri `main` ga qilindi.
+- **Oqibat:** Keyingi ishlar (S1 dan boshlab) alohida branch'larda olib boriladi.
