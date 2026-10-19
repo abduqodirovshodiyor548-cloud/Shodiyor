@@ -9,6 +9,7 @@ import { GoalCard } from "@/routes/goals/GoalCard";
 import { GoalSheet, type SheetTarget } from "@/routes/goals/GoalSheet";
 import { dayTitle } from "@/routes/goals/labels";
 import { TaskSheet, type TaskTarget } from "@/routes/goals/TaskSheet";
+import { TaskDnd } from "@/routes/goals/dnd";
 import { Section, byStatusPriority, type RowAction } from "@/routes/goals/TaskViews";
 
 // S1-09: "Bugun" — kunning fokus vazifalari (1–3 ta), qolgan kunlik vazifalar, muddati o'tganlar va
@@ -138,85 +139,89 @@ export function TodayPage({ date: dateParam }: { date?: string }) {
       ) : tasks.isError ? (
         <p className="text-sm text-destructive">Vazifalarni yuklab bo'lmadi: {tasks.error.message}</p>
       ) : (
-        <div className="grid gap-6 lg:grid-cols-3">
-          <div className="space-y-4 lg:col-span-2">
-            <Section
-              title={
-                <span className="inline-flex items-center gap-1.5">
-                  <Star className="size-4 fill-warning text-warning" /> Fokus
-                </span>
-              }
-              sub={
-                focus.length > FOCUS_LIMIT
-                  ? `${FOCUS_LIMIT} tadan ko'p — eng muhimlarini qoldiring`
-                  : `kunning eng muhim ${FOCUS_LIMIT} ta vazifasi`
-              }
-              className="border-warning/40"
-              tasks={focus}
-              goals={goals}
-              showPlan={false}
-              onOpen={setTaskSheet}
-              action={star}
-              empty="Quyidagi vazifalardan eng muhimlarini yulduzcha bilan belgilang yoki shu yerga yozing."
-              add={{ plan: { level: "day", date }, placeholder: "Fokus vazifa…", extra: { focus: true } }}
-            />
-            <Section
-              title="Boshqa vazifalar"
-              tasks={rest}
-              goals={goals}
-              showPlan={false}
-              onOpen={setTaskSheet}
-              action={star}
-              empty={day.length === 0 ? "Bu kun uchun vazifa yo'q." : undefined}
-              add={{ plan: { level: "day", date }, placeholder: "Vazifa qo'shish…" }}
-            />
-            {isToday && (overdue.data?.length ?? 0) > 0 && (
+        <TaskDnd>
+          <div className="grid gap-6 lg:grid-cols-3">
+            <div className="space-y-4 lg:col-span-2">
               <Section
-                title="Muddati o'tgan"
-                sub="oldingi kunlardan qolgan"
-                className="border-destructive/40"
-                tasks={[...overdue.data!].sort((a, b) => (a.planStart ?? "").localeCompare(b.planStart ?? ""))}
+                title={
+                  <span className="inline-flex items-center gap-1.5">
+                    <Star className="size-4 fill-warning text-warning" /> Fokus
+                  </span>
+                }
+                sub={
+                  focus.length > FOCUS_LIMIT
+                    ? `${FOCUS_LIMIT} tadan ko'p — eng muhimlarini qoldiring`
+                    : `kunning eng muhim ${FOCUS_LIMIT} ta vazifasi`
+                }
+                className="border-warning/40"
+                tasks={focus}
                 goals={goals}
-                showPlan
+                showPlan={false}
                 onOpen={setTaskSheet}
-                action={toThisDay}
+                action={star}
+                empty="Quyidagi vazifalardan eng muhimlarini yulduzcha bilan belgilang yoki shu yerga yozing."
+                add={{ plan: { level: "day", date }, placeholder: "Fokus vazifa…", extra: { focus: true } }}
+                drop={{ id: "today-focus", target: { kind: "plan", plan: { level: "day", date }, focus: true } }}
               />
-            )}
-          </div>
-
-          <aside className="space-y-4">
-            <section className="space-y-2">
-              <h2 className="text-sm font-medium text-muted-foreground">Shu hafta maqsadlari</h2>
-              {weekGoals.length === 0 ? (
-                <p className="text-sm text-muted-foreground">
-                  Haftalik maqsad yo'q.{" "}
-                  <Link
-                    to="/maqsadlar"
-                    search={{ view: "hafta", period: periodKey(week) }}
-                    className="text-primary hover:underline"
-                  >
-                    Qo'shish
-                  </Link>
-                </p>
-              ) : (
-                weekGoals.map((g) => (
-                  <GoalCard key={g.id} goal={g} compact onOpen={(id) => setGoalSheet({ kind: "edit", id })} />
-                ))
+              <Section
+                title="Boshqa vazifalar"
+                tasks={rest}
+                goals={goals}
+                showPlan={false}
+                onOpen={setTaskSheet}
+                action={star}
+                empty={day.length === 0 ? "Bu kun uchun vazifa yo'q." : undefined}
+                add={{ plan: { level: "day", date }, placeholder: "Vazifa qo'shish…" }}
+                drop={{ id: "today-rest", target: { kind: "plan", plan: { level: "day", date }, focus: false } }}
+              />
+              {isToday && (overdue.data?.length ?? 0) > 0 && (
+                <Section
+                  title="Muddati o'tgan"
+                  sub="oldingi kunlardan qolgan"
+                  className="border-destructive/40"
+                  tasks={[...overdue.data!].sort((a, b) => (a.planStart ?? "").localeCompare(b.planStart ?? ""))}
+                  goals={goals}
+                  showPlan
+                  onOpen={setTaskSheet}
+                  action={toThisDay}
+                />
               )}
-            </section>
-            {later.length > 0 && (
-              <Section
-                title="Hafta va oy davomida"
-                sub="kun belgilanmagan"
-                tasks={later}
-                goals={goals}
-                showPlan
-                onOpen={setTaskSheet}
-                action={toThisDay}
-              />
-            )}
-          </aside>
-        </div>
+            </div>
+
+            <aside className="space-y-4">
+              <section className="space-y-2">
+                <h2 className="text-sm font-medium text-muted-foreground">Shu hafta maqsadlari</h2>
+                {weekGoals.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">
+                    Haftalik maqsad yo'q.{" "}
+                    <Link
+                      to="/maqsadlar"
+                      search={{ view: "hafta", period: periodKey(week) }}
+                      className="text-primary hover:underline"
+                    >
+                      Qo'shish
+                    </Link>
+                  </p>
+                ) : (
+                  weekGoals.map((g) => (
+                    <GoalCard key={g.id} goal={g} compact onOpen={(id) => setGoalSheet({ kind: "edit", id })} />
+                  ))
+                )}
+              </section>
+              {later.length > 0 && (
+                <Section
+                  title="Hafta va oy davomida"
+                  sub="kun belgilanmagan"
+                  tasks={later}
+                  goals={goals}
+                  showPlan
+                  onOpen={setTaskSheet}
+                  action={toThisDay}
+                />
+              )}
+            </aside>
+          </div>
+        </TaskDnd>
       )}
 
       <TaskSheet

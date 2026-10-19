@@ -15,11 +15,13 @@ import {
 import { Button, Input } from "@/components/ui";
 import { planningApi, usePlanningMutation } from "@/lib/planning";
 import { cn } from "@/lib/utils";
+import { useDraggableTask, useDropTarget, type DropTarget } from "./dnd";
 import { PRIORITIES, TASK_STATUS_LABEL, dayTitle, periodTitle, planShort } from "./labels";
 import type { TaskTarget } from "./TaskSheet";
 
 // S1-08: oy va hafta ko'rinishlaridagi vazifalar — kanban (holat bo'yicha) va ro'yxat (reja davri bo'yicha).
-// Vazifani boshqa kun/haftaga sudrab ko'chirish — S1-10.
+// S1-10: qatorlar va kartalar sudraladi; bo'limlar (reja) va kanban ustunlari (holat) — tashlash nishonlari.
+// Sudrash konteksti (`TaskDnd`) sahifa darajasida o'raladi.
 
 export type TaskMode = "royxat" | "kanban";
 
@@ -125,9 +127,12 @@ function TaskRow({
   onOpen: ViewProps["onOpen"];
   action?: RowAction;
 }) {
+  const drag = useDraggableTask(task);
   return (
     <li
-      className="flex cursor-pointer items-start gap-3 px-3 py-2 hover:bg-accent/50"
+      ref={drag.ref}
+      {...drag.props}
+      className={cn("flex cursor-pointer items-start gap-3 px-3 py-2 hover:bg-accent/50", drag.className)}
       onClick={() => onOpen({ kind: "edit", id: task.id })}
     >
       <div className="pt-0.5">
@@ -196,6 +201,7 @@ export function Section({
   action,
   empty,
   className,
+  drop,
 }: {
   title: ReactNode;
   sub?: string;
@@ -209,11 +215,22 @@ export function Section({
   /** Vazifa bo'lmasa ko'rsatiladigan matn. */
   empty?: string;
   className?: string;
+  /** Shu bo'limga tashlangan vazifa oladigan reja (S1-10). */
+  drop?: { id: string; target: DropTarget };
 }) {
   const done = tasks.filter((t) => t.status === "done").length;
   const open = tasks.filter((t) => t.status !== "cancelled").length;
+  const dropZone = useDropTarget(drop?.id ?? "", drop?.target);
   return (
-    <section className={cn("overflow-hidden rounded-xl border bg-card", highlight && "border-primary/50", className)}>
+    <section
+      ref={drop ? dropZone.ref : undefined}
+      className={cn(
+        "overflow-hidden rounded-xl border bg-card transition-shadow",
+        highlight && "border-primary/50",
+        className,
+        dropZone.isOver && "ring-2 ring-ring",
+      )}
+    >
       <header className={cn("flex items-baseline gap-2 border-b px-3 py-2", highlight && "bg-primary/5")}>
         <h3 className={cn("text-sm font-medium", highlight && "text-primary")}>{title}</h3>
         {sub && <span className="text-xs text-muted-foreground">{sub}</span>}
@@ -251,9 +268,17 @@ export function WeekList({ period, tasks, goals, today, onOpen }: ViewProps) {
         showPlan={false}
         onOpen={onOpen}
         add={{ plan: { level: "week", date: period.start }, placeholder: "Hafta uchun vazifa…" }}
+        drop={{ id: `week-${period.start}`, target: { kind: "plan", plan: { level: "week", date: period.start } } }}
       />
       {monthTasks.length > 0 && (
-        <Section title="Oy davomida" tasks={monthTasks} goals={goals} showPlan onOpen={onOpen} />
+        <Section
+          title="Oy davomida"
+          tasks={monthTasks}
+          goals={goals}
+          showPlan
+          onOpen={onOpen}
+          drop={{ id: `month-${period.start}`, target: { kind: "plan", plan: { level: "month", date: period.start } } }}
+        />
       )}
       {days.map((d) => (
         <Section
@@ -265,6 +290,7 @@ export function WeekList({ period, tasks, goals, today, onOpen }: ViewProps) {
           showPlan={false}
           onOpen={onOpen}
           add={{ plan: { level: "day", date: d }, placeholder: "Vazifa qo'shish…" }}
+          drop={{ id: `day-${d}`, target: { kind: "plan", plan: { level: "day", date: d } } }}
         />
       ))}
     </div>
@@ -285,6 +311,7 @@ export function MonthList({ period, tasks, goals, today, onOpen }: ViewProps) {
         showPlan={false}
         onOpen={onOpen}
         add={{ plan: { level: "month", date: period.start }, placeholder: "Oy uchun vazifa…" }}
+        drop={{ id: `month-${period.start}`, target: { kind: "plan", plan: { level: "month", date: period.start } } }}
       />
       <div className="grid gap-4 lg:grid-cols-2">
         {weeks.map((w) => {
@@ -306,6 +333,7 @@ export function MonthList({ period, tasks, goals, today, onOpen }: ViewProps) {
               showPlan
               onOpen={onOpen}
               add={{ plan: { level: "week", date: w.start }, placeholder: "Hafta uchun vazifa…" }}
+              drop={{ id: `week-${w.start}`, target: { kind: "plan", plan: { level: "week", date: w.start } } }}
             />
           );
         })}
@@ -324,13 +352,22 @@ const NEXT: Partial<Record<TaskStatus, { status: TaskStatus; label: string; icon
 function KanbanCard({ task, goals, onOpen }: { task: TaskDto; goals: GoalTreeNode[]; onOpen: ViewProps["onOpen"] }) {
   const setStatus = useSetStatus();
   const next = NEXT[task.status];
+  const drag = useDraggableTask(task);
   return (
     <div
+      ref={drag.ref}
+      {...drag.props}
       role="button"
       tabIndex={0}
       onClick={() => onOpen({ kind: "edit", id: task.id })}
-      onKeyDown={(e) => e.key === "Enter" && onOpen({ kind: "edit", id: task.id })}
-      className="space-y-2 rounded-lg border bg-card p-3 shadow-xs hover:border-ring/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      onKeyDown={(e) => {
+        drag.props.onKeyDown?.(e);
+        if (e.key === "Enter") onOpen({ kind: "edit", id: task.id });
+      }}
+      className={cn(
+        "space-y-2 rounded-lg border bg-card p-3 shadow-xs hover:border-ring/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        drag.className,
+      )}
     >
       <div className="flex items-start gap-2">
         <span className={cn("min-w-0 flex-1 text-sm", closed(task) && "text-muted-foreground line-through")}>
@@ -357,6 +394,48 @@ function KanbanCard({ task, goals, onOpen }: { task: TaskDto; goals: GoalTreeNod
   );
 }
 
+function KanbanColumn({
+  status,
+  tasks,
+  goals,
+  onOpen,
+  onCreate,
+}: {
+  status: TaskStatus;
+  tasks: TaskDto[];
+  goals: GoalTreeNode[];
+  onOpen: ViewProps["onOpen"];
+  onCreate?: () => void;
+}) {
+  const drop = useDropTarget(`status-${status}`, { kind: "status", status });
+  return (
+    <div
+      ref={drop.ref}
+      className={cn(
+        "flex flex-col gap-2 rounded-xl border bg-muted/30 p-3 transition-shadow",
+        drop.isOver && "ring-2 ring-ring",
+      )}
+    >
+      <div className="flex items-center justify-between px-1">
+        <h3 className="text-sm font-medium">{TASK_STATUS_LABEL[status]}</h3>
+        <span className="text-xs tabular-nums text-muted-foreground">{tasks.length}</span>
+      </div>
+      {tasks.map((t) => (
+        <KanbanCard key={t.id} task={t} goals={goals} onOpen={onOpen} />
+      ))}
+      {onCreate && (
+        <button
+          type="button"
+          onClick={onCreate}
+          className="flex items-center gap-2 rounded-lg border border-dashed px-3 py-2 text-sm text-muted-foreground hover:bg-accent/40"
+        >
+          <Plus className="size-4" /> Vazifa
+        </button>
+      )}
+    </div>
+  );
+}
+
 /** Kanban: holat bo'yicha ustunlar. "Bekor qilindi" ustuni faqat shunday vazifa bo'lsa ko'rinadi. */
 export function TaskBoard({ period, tasks, goals, onOpen }: ViewProps) {
   const statuses = TASK_STATUSES.filter((s) => s !== "cancelled" || tasks.some((t) => t.status === s));
@@ -366,29 +445,16 @@ export function TaskBoard({ period, tasks, goals, onOpen }: ViewProps) {
       className="grid gap-4 md:grid-cols-[repeat(var(--cols),minmax(0,1fr))]"
       style={{ "--cols": statuses.length } as React.CSSProperties}
     >
-      {statuses.map((s) => {
-        const items = tasks.filter((t) => t.status === s).sort(byDateThenStatus);
-        return (
-          <div key={s} className="flex flex-col gap-2 rounded-xl border bg-muted/30 p-3">
-            <div className="flex items-center justify-between px-1">
-              <h3 className="text-sm font-medium">{TASK_STATUS_LABEL[s]}</h3>
-              <span className="text-xs tabular-nums text-muted-foreground">{items.length}</span>
-            </div>
-            {items.map((t) => (
-              <KanbanCard key={t.id} task={t} goals={goals} onOpen={onOpen} />
-            ))}
-            {s === "todo" && (
-              <button
-                type="button"
-                onClick={() => onOpen({ kind: "create", plan })}
-                className="flex items-center gap-2 rounded-lg border border-dashed px-3 py-2 text-sm text-muted-foreground hover:bg-accent/40"
-              >
-                <Plus className="size-4" /> Vazifa
-              </button>
-            )}
-          </div>
-        );
-      })}
+      {statuses.map((s) => (
+        <KanbanColumn
+          key={s}
+          status={s}
+          tasks={tasks.filter((t) => t.status === s).sort(byDateThenStatus)}
+          goals={goals}
+          onOpen={onOpen}
+          onCreate={s === "todo" ? () => onOpen({ kind: "create", plan }) : undefined}
+        />
+      ))}
     </div>
   );
 }

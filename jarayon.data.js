@@ -1,6 +1,6 @@
 // Avtomatik yaratilgan: node scripts/jarayon-sync.mjs. Qo'lda tahrirlamang.
 window.JARAYON = {
-  "yangilangan": "2026-10-19T09:14:06.331Z",
+  "yangilangan": "2026-10-19T09:37:29.610Z",
   "loyiha": "Lokal AI Dashboard",
   "sprints": [
     {
@@ -203,9 +203,9 @@ window.JARAYON = {
         },
         {
           "id": "S1-10",
-          "title": "Drag-and-drop bilan vazifani kun/haftaga ko'chirish (dnd-kit)",
+          "title": "Drag-and-drop bilan vazifani kun/haftaga ko'chirish (dnd-kit) — `@dnd-kit/core`; nishon: kun/hafta/oy bo'limi, kanban ustuni, \"Bugun\" fokus/boshqa; optimistik ko'chirish; sichqoncha va klaviatura (Space) bilan sinaldi. Typecheck 7/7, lint 0, sinovlar 37+36. Qarorlar: Q-059…Q-062",
           "group": "UI",
-          "status": "rejalashtirilgan"
+          "status": "bajarildi"
         },
         {
           "id": "S1-11",
@@ -1436,6 +1436,44 @@ window.JARAYON = {
       "status": "qabul qilingan",
       "kontekst": "Q-023 (kun belgilanmagan vazifalar), Q-052.",
       "qaror": "Muddati o'tgan = rejasi kunlik, sanasi bugundan oldin, holati todo/in_progress (`GET /api/tasks?to=kecha&planLevel=day&status=todo,in_progress`); faqat bugun ko'rilganda ko'rsatiladi. Hafta/oy darajasidagi vazifalar kechikkan hisoblanmaydi — o'ng ustunda \"kunga olish\" uchun ko'rsatiladi."
+    },
+    {
+      "id": "Q-059",
+      "sarlavha": "Drag-and-drop — nishon bo'lim/ustun, `@dnd-kit/core`",
+      "sana": "2026-10-19",
+      "sprint": "S1 (S1-10)",
+      "status": "qabul qilingan",
+      "kontekst": "Vazifani kun/haftaga ko'chirish kerak edi.",
+      "qaror": "Tashlash nishoni — bo'lim yoki ustun (reja davri `plan` yoki holat `status`), bo'lim ichidagi tartib (sort_order) emas. Faqat `@dnd-kit/core` ^6.3.1 o'rnatildi; `apps/web/src/routes/goals/dnd.tsx` (`TaskDnd`, `useDraggableTask`, `useDropTarget`, `DragOverlay`). Bir xil joyga tashlash so'rov yubormaydi.",
+      "rad etilgan": "`@dnd-kit/sortable` va sort_order yangilash — ichki tartiblash hozir kerak emas, kerak bo'lsa keyin.",
+      "oqibat": "Kalendar (S2) vaqt bloklariga sudrash kerak bo'lsa `TaskDnd`/`DropTarget` kengaytiriladi."
+    },
+    {
+      "id": "Q-060",
+      "sarlavha": "Sudrashda optimistik yangilash (Q-053 dan istisno)",
+      "sana": "2026-10-19",
+      "sprint": "S1 (S1-10)",
+      "status": "qabul qilingan",
+      "kontekst": "Q-053 optimistik yangilashni rad etgan edi; sudrashda tashlangan element eski joyiga \"sakrab qaytishi\" yomon ko'rinadi.",
+      "qaror": "Faqat ko'chirishda keshdagi barcha [\"tasks\"] ro'yxatlari darhol yangilanadi, so'ng tasks va goals qayta yuklanadi; xatoda qayta yuklanadi va pastda xabar chiqadi. Boshqa amallar (forma, checkbox) optimistiksiz qoladi."
+    },
+    {
+      "id": "Q-061",
+      "sarlavha": "Sudrash sensorlari — PointerSensor 6px, KeyboardSensor Space",
+      "sana": "2026-10-19",
+      "sprint": "S1 (S1-10)",
+      "status": "qabul qilingan",
+      "qaror": "PointerSensor 6px masofa chegarasi bilan — oddiy bosish (panel, checkbox, yulduzcha) sudrash bilan to'qnashmaydi. KeyboardSensor faqat Space bilan olish/tashlash, Esc bekor; Enter vazifa panelini ochish uchun band.",
+      "eslatma": "Birinchi klaviatura urinishi sudrashni boshlamadi (sababi aniqlanmadi), keyingilari barqaror ishladi."
+    },
+    {
+      "id": "Q-062",
+      "sarlavha": "\"Bugun\"da bo'limga tashlash fokusni ham o'rnatadi",
+      "sana": "2026-10-19",
+      "sprint": "S1 (S1-10)",
+      "status": "qabul qilingan",
+      "kontekst": "Q-055, Q-057.",
+      "qaror": "\"Fokus\" bo'limiga tashlash focus=true, \"Boshqa vazifalar\"ga — focus=false qo'yadi va reja kunini ham shu kunga o'rnatadi."
     }
   ],
   "hisobotlar": [

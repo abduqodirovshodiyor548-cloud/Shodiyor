@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import { GoalCard } from "./GoalCard";
 import { GoalSheet, type SheetTarget } from "./GoalSheet";
 import { LEVEL_LABEL, isCurrent, periodTitle, quarterMonths } from "./labels";
+import { TaskDnd } from "./dnd";
 import { TaskSheet, type TaskTarget } from "./TaskSheet";
 import { MonthList, TaskBoard, WeekList, type TaskMode } from "./TaskViews";
 
@@ -162,8 +163,17 @@ export function GoalsPage({ view, period: key, mode }: { view: GoalView; period?
             ) : (
               (() => {
                 const props = { period, tasks: tasks.data, goals: flat, today, onOpen: setTaskSheet };
-                if (mode === "kanban") return <TaskBoard {...props} />;
-                return view === "hafta" ? <WeekList {...props} /> : <MonthList {...props} />;
+                return (
+                  <TaskDnd>
+                    {mode === "kanban" ? (
+                      <TaskBoard {...props} />
+                    ) : view === "hafta" ? (
+                      <WeekList {...props} />
+                    ) : (
+                      <MonthList {...props} />
+                    )}
+                  </TaskDnd>
+                );
               })()
             )}
           </section>

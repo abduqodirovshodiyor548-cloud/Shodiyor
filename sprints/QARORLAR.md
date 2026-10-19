@@ -479,3 +479,33 @@ Format (hisobotchi agent va sinxron skript shunga tayanadi):
 - **Status:** qabul qilingan
 - **Kontekst:** Q-023 (kun belgilanmagan vazifalar), Q-052.
 - **Qaror:** Muddati o'tgan = rejasi kunlik, sanasi bugundan oldin, holati todo/in_progress (`GET /api/tasks?to=kecha&planLevel=day&status=todo,in_progress`); faqat bugun ko'rilganda ko'rsatiladi. Hafta/oy darajasidagi vazifalar kechikkan hisoblanmaydi — o'ng ustunda "kunga olish" uchun ko'rsatiladi.
+
+## Q-059: Drag-and-drop — nishon bo'lim/ustun, `@dnd-kit/core`
+- **Sana:** 2026-10-19
+- **Sprint:** S1 (S1-10)
+- **Status:** qabul qilingan
+- **Kontekst:** Vazifani kun/haftaga ko'chirish kerak edi.
+- **Qaror:** Tashlash nishoni — bo'lim yoki ustun (reja davri `plan` yoki holat `status`), bo'lim ichidagi tartib (sort_order) emas. Faqat `@dnd-kit/core` ^6.3.1 o'rnatildi; `apps/web/src/routes/goals/dnd.tsx` (`TaskDnd`, `useDraggableTask`, `useDropTarget`, `DragOverlay`). Bir xil joyga tashlash so'rov yubormaydi.
+- **Rad etilgan:** `@dnd-kit/sortable` va sort_order yangilash — ichki tartiblash hozir kerak emas, kerak bo'lsa keyin.
+- **Oqibat:** Kalendar (S2) vaqt bloklariga sudrash kerak bo'lsa `TaskDnd`/`DropTarget` kengaytiriladi.
+
+## Q-060: Sudrashda optimistik yangilash (Q-053 dan istisno)
+- **Sana:** 2026-10-19
+- **Sprint:** S1 (S1-10)
+- **Status:** qabul qilingan
+- **Kontekst:** Q-053 optimistik yangilashni rad etgan edi; sudrashda tashlangan element eski joyiga "sakrab qaytishi" yomon ko'rinadi.
+- **Qaror:** Faqat ko'chirishda keshdagi barcha ["tasks"] ro'yxatlari darhol yangilanadi, so'ng tasks va goals qayta yuklanadi; xatoda qayta yuklanadi va pastda xabar chiqadi. Boshqa amallar (forma, checkbox) optimistiksiz qoladi.
+
+## Q-061: Sudrash sensorlari — PointerSensor 6px, KeyboardSensor Space
+- **Sana:** 2026-10-19
+- **Sprint:** S1 (S1-10)
+- **Status:** qabul qilingan
+- **Qaror:** PointerSensor 6px masofa chegarasi bilan — oddiy bosish (panel, checkbox, yulduzcha) sudrash bilan to'qnashmaydi. KeyboardSensor faqat Space bilan olish/tashlash, Esc bekor; Enter vazifa panelini ochish uchun band.
+- **Eslatma:** Birinchi klaviatura urinishi sudrashni boshlamadi (sababi aniqlanmadi), keyingilari barqaror ishladi.
+
+## Q-062: "Bugun"da bo'limga tashlash fokusni ham o'rnatadi
+- **Sana:** 2026-10-19
+- **Sprint:** S1 (S1-10)
+- **Status:** qabul qilingan
+- **Kontekst:** Q-055, Q-057.
+- **Qaror:** "Fokus" bo'limiga tashlash focus=true, "Boshqa vazifalar"ga — focus=false qo'yadi va reja kunini ham shu kunga o'rnatadi.
