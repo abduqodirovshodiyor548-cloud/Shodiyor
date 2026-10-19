@@ -1,14 +1,17 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
+import { getDb, type Db } from "@loiha/db";
+import { registerPlanningTools } from "./planning-tools.ts";
 
 export const SERVER_NAME = "dashboard";
 
 /**
  * dashboard-mcp: Claude'ga dashboard ma'lumotlarini tool sifatida ochadi.
- * S0 da faqat `ping`; maqsad/vazifa tool'lari S1 da qo'shiladi.
+ * S0: `ping`. S1-12: maqsad va vazifa tool'lari (planning-tools.ts).
+ * `db` berilmasa — umumiy SQLite ulanishi (server bilan bir xil fayl, WAL rejimida parallel ishlaydi).
  */
-export function createDashboardMcpServer(): McpServer {
-  const server = new McpServer({ name: SERVER_NAME, version: "0.1.0" });
+export function createDashboardMcpServer(db: Db = getDb(), today?: () => string): McpServer {
+  const server = new McpServer({ name: SERVER_NAME, version: "0.2.0" });
 
   server.registerTool(
     "ping",
@@ -27,5 +30,6 @@ export function createDashboardMcpServer(): McpServer {
     }),
   );
 
+  registerPlanningTools(server, db, today);
   return server;
 }

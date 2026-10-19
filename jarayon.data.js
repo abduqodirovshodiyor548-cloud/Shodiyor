@@ -1,6 +1,6 @@
 // Avtomatik yaratilgan: node scripts/jarayon-sync.mjs. Qo'lda tahrirlamang.
 window.JARAYON = {
-  "yangilangan": "2026-10-19T09:46:17.251Z",
+  "yangilangan": "2026-10-19T09:52:41.602Z",
   "loyiha": "Lokal AI Dashboard",
   "sprints": [
     {
@@ -134,16 +134,16 @@ window.JARAYON = {
       "maqsad": "Yillik → kvartal → oylik → haftalik → kunlik darajadagi maqsad va vazifalar tizimini qo'lda to'liq boshqarish imkoniyati. Claude bu ma'lumotlar bilan MCP orqali ishlay oladi.",
       "dod": [
         {
-          "text": "Yillik maqsaddan kunlik vazifagacha bo'lgan zanjirni yaratish va ko'rish mumkin",
-          "done": null
+          "text": "Yillik maqsaddan kunlik vazifagacha bo'lgan zanjirni yaratish va ko'rish mumkin (S1-07…S1-09, brauzerda sinalgan)",
+          "done": true
         },
         {
-          "text": "Vazifa bajarilganda yuqori darajadagi progress avtomatik yangilanadi",
-          "done": null
+          "text": "Vazifa bajarilganda yuqori darajadagi progress avtomatik yangilanadi (S1-05, UI va MCP orqali sinalgan)",
+          "done": true
         },
         {
-          "text": "Claude AI konsoldan \"bu haftaning vazifalarini ko'rsat\" so'roviga MCP orqali javob beradi",
-          "done": null
+          "text": "Claude AI konsoldan \"bu haftaning vazifalarini ko'rsat\" so'roviga MCP orqali javob beradi — QISMAN: MCP tomoni tayyor va protokol darajasida (in-memory va real stdio) sinalgan, lekin real Claude bilan uchidan-uchigacha tekshirilmagan: bu Windows mashinada `claude` CLI o'rnatilmagan (`.env` da `CLAUDE_BIN=claude`, PATH'da yo'q; server health: `spawn claude ENOENT`)",
+          "done": false
         }
       ],
       "tasks": [
@@ -215,9 +215,9 @@ window.JARAYON = {
         },
         {
           "id": "S1-12",
-          "title": "dashboard-mcp tool'lari: `list_goals`, `get_goal_tree`, `create_task`, `update_task`, `update_progress`",
+          "title": "dashboard-mcp tool'lari: `list_goals`, `get_goal_tree`, `create_task`, `update_task`, `update_progress` (+ rejadan tashqari `list_tasks`) — `packages/mcp/src/planning-tools.ts`, `createDashboardMcpServer(db, today?)` `packages/mcp/src/index.ts` da; `getKeyResult` `packages/db/src/planning.ts` da; chat profili ko'rsatmasi `apps/server/src/claude/profiles.ts` da. Mantiq `@loiha/db` servislarida, kirish REST bilan bir xil zod sxemalaridan o'tadi, nisbiy davrlar (this_week…), xatolar `isError` bilan. Tekshirildi: typecheck 7/7, lint 0, format toza, shared 42 + db 40 + mcp 5 sinov (InMemoryTransport orqali MCP protokolida); `bin.ts` alohida jarayon sifatida (stdio) test bazasida sinaldi — 7 tool ko'rindi, `list_tasks(this_week)` 10 ta ochiq vazifa qaytardi. Real Claude CLI bilan sinalmagan (quyida DoD 3 ga qarang). Qarorlar: Q-068…Q-072",
           "group": "MCP",
-          "status": "rejalashtirilgan"
+          "status": "bajarildi"
         }
       ]
     },
@@ -1520,6 +1520,53 @@ window.JARAYON = {
       "sprint": "S1 (S1-11)",
       "status": "qabul qilingan",
       "qaror": "`CommandPalette` AppShell'da; Ctrl+K va Cmd+K `e.code === \"KeyK\"` bo'yicha — klaviatura tartibidan (masalan kirill) qat'i nazar. Matn qo'shishda darhol tozalanadi (ketma-ket qo'shish uchun), xatoda qaytariladi."
+    },
+    {
+      "id": "Q-068",
+      "sarlavha": "`list_tasks` tool'i rejadan tashqari qo'shildi",
+      "sana": "2026-10-19",
+      "sprint": "S1 (S1-12)",
+      "status": "qabul qilingan",
+      "kontekst": "Reja 5 ta tool'ni nomlagan edi (list_goals, get_goal_tree, create_task, update_task, update_progress). Rejadan chetlanish.",
+      "qaror": "Oltinchi tool `list_tasks` qo'shildi (davr, status va h.k. filtrlari bilan).",
+      "sabab": "DoD 3 (\"bu haftaning vazifalari\") uchun zarur; `get_goal_tree` faqat maqsadga bog'langan vazifalarni ko'rsatadi, bog'lanmagan/inbox vazifalar chiqmay qolardi."
+    },
+    {
+      "id": "Q-069",
+      "sarlavha": "MCP natijalari ixcham JSON",
+      "sana": "2026-10-19",
+      "sprint": "S1 (S1-12)",
+      "status": "qabul qilingan",
+      "qaror": "Tool natijalari ixcham JSON: progress foizda (`progressPercent`), faqat kerakli maydonlar va id'lar, `today` maydoni. To'liq DTO qaytarilmaydi.",
+      "sabab": "Claude kontekstini tejash va o'qishni osonlashtirish."
+    },
+    {
+      "id": "Q-070",
+      "sarlavha": "Nisbiy davr nomlari va server tomonidagi `today`",
+      "sana": "2026-10-19",
+      "sprint": "S1 (S1-12)",
+      "status": "qabul qilingan",
+      "qaror": "today/tomorrow/this_week/next_week/last_week/this_month/this_quarter/this_year (+ o'zbekcha bugun/ertaga/shu_hafta…) qabul qilinadi; sana server tomonida hisoblanadi va natijada `today` qaytadi.",
+      "sabab": "Claude bugungi sanani ishonchli bilmaydi. Davr mantiqi Q-027…Q-029 (`@loiha/shared`) ga tayanadi."
+    },
+    {
+      "id": "Q-071",
+      "sarlavha": "MCP server bevosita SQLite'ni ochadi (REST'ga HTTP emas)",
+      "sana": "2026-10-19",
+      "sprint": "S1 (S1-12)",
+      "status": "qabul qilingan",
+      "kontekst": "Q-037 (mantiq `@loiha/db` servislarida), Q-031 (progress keshi).",
+      "qaror": "MCP server o'z jarayonida `getDb()` bilan bir xil SQLite faylini ochadi (WAL — server bilan parallel yozish xavfsiz). `createDashboardMcpServer(db, today?)` — testda in-memory DB va qat'iy sana inject qilinadi. Kirish REST bilan bir xil zod sxemalaridan o'tadi.",
+      "rad etilgan": "MCP'dan REST API'ga HTTP chaqiruv — server ishlamay turganda MCP ham ishlamay qolardi, ikki marta serializatsiya."
+    },
+    {
+      "id": "Q-072",
+      "sarlavha": "MCP xatolari `isError` natijasi sifatida",
+      "sana": "2026-10-19",
+      "sprint": "S1 (S1-12)",
+      "status": "qabul qilingan",
+      "qaror": "Xatolar exception emas, `isError: true` va tushunarli matn bilan qaytadi. Teglar nom bilan beriladi, yo'qlari yaratiladi (Q-065 kabi), katta-kichik harfga qaramay moslanadi.",
+      "sabab": "Claude xabarni ko'rib, o'zi tuzatib qayta urinishi mumkin. Sinovda topilgan xato (\"ish\" va \"#Ish\" ikki marta yaratilmoqchi bo'lib conflict berardi) tuzatildi."
     }
   ],
   "hisobotlar": [

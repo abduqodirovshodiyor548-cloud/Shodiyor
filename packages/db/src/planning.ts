@@ -310,6 +310,10 @@ export function deleteGoal(db: Db, id: string): void {
 
 // ---------- Key result'lar ----------
 
+export function getKeyResult(db: Db, id: string): KeyResultDto {
+  return toKeyResultDto(requireKeyResult(db, id));
+}
+
 export function createKeyResult(db: Db, input: CreateKeyResultInput): KeyResultDto {
   return db.transaction((tx) => {
     requireGoal(tx, input.goalId);

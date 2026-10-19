@@ -29,7 +29,11 @@ const dashboardMcp: McpServerSpec = {
 
 const BASE_PROMPT =
   "Sen foydalanuvchining shaxsiy lokal dashboard assistentisan. Odatda o'zbek tilida (lotin), qisqa va aniq javob ber. " +
-  "Dashboard ma'lumotlari bilan faqat `dashboard` MCP tool'lari orqali ishlaysan.";
+  "Dashboard ma'lumotlari bilan faqat `dashboard` MCP tool'lari orqali ishlaysan. " +
+  // S1-12: maqsad va vazifa tool'lari.
+  "Maqsad va vazifalar: list_tasks, list_goals, get_goal_tree (o'qish), create_task, update_task, update_progress (yozish). " +
+  "Davrlar uchun nisbiy nomlardan foydalan (today, this_week, this_month …) — bugungi sana tool javobidagi `today` maydonida. " +
+  "Vazifani o'zgartirishdan oldin uning id'sini ro'yxat tool'lari orqali aniqla; foydalanuvchiga id emas, nomlarni ko'rsat.";
 
 const PROFILES: Record<ClaudeProfile, ProfileSpec> = {
   chat: {

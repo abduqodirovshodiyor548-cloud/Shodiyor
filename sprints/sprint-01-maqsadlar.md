@@ -32,18 +32,19 @@ Yillik → kvartal → oylik → haftalik → kunlik darajadagi maqsad va vazifa
 - [x] **S1-11** Ustuvorlik, teglar, qidiruv va tezkor qo'shish (Cmd+K) — backend: `GET /api/tasks?q=&tagId=` va `GET /api/goals?q=` (LIKE, ESCAPE); `packages/shared/src/quickAdd.ts` (`parseQuickAdd`: #teg, !1–3, @reja); web: `components/CommandPalette.tsx` (Ctrl/Cmd+K), `routes/goals/tags.tsx` (TagChip, TagPicker), TaskSheet'da teglar, oy/hafta'da teg filtri. Ustuvorlik UI avval S1-08 da bor edi. Tekshirildi: typecheck 7/7, lint 0, shared 42/42, db 40/40, brauzerda (mobil 375px). Sinov paytida topilgan xato (palitrada matn kech tozalanishi) tuzatildi. Qarorlar: Q-063…Q-067
 
 ### MCP
-- [ ] **S1-12** dashboard-mcp tool'lari: `list_goals`, `get_goal_tree`, `create_task`, `update_task`, `update_progress`
+- [x] **S1-12** dashboard-mcp tool'lari: `list_goals`, `get_goal_tree`, `create_task`, `update_task`, `update_progress` (+ rejadan tashqari `list_tasks`) — `packages/mcp/src/planning-tools.ts`, `createDashboardMcpServer(db, today?)` `packages/mcp/src/index.ts` da; `getKeyResult` `packages/db/src/planning.ts` da; chat profili ko'rsatmasi `apps/server/src/claude/profiles.ts` da. Mantiq `@loiha/db` servislarida, kirish REST bilan bir xil zod sxemalaridan o'tadi, nisbiy davrlar (this_week…), xatolar `isError` bilan. Tekshirildi: typecheck 7/7, lint 0, format toza, shared 42 + db 40 + mcp 5 sinov (InMemoryTransport orqali MCP protokolida); `bin.ts` alohida jarayon sifatida (stdio) test bazasida sinaldi — 7 tool ko'rindi, `list_tasks(this_week)` 10 ta ochiq vazifa qaytardi. Real Claude CLI bilan sinalmagan (quyida DoD 3 ga qarang). Qarorlar: Q-068…Q-072
 
 ## Qabul mezonlari (Definition of Done)
-- Yillik maqsaddan kunlik vazifagacha bo'lgan zanjirni yaratish va ko'rish mumkin
-- Vazifa bajarilganda yuqori darajadagi progress avtomatik yangilanadi
-- Claude AI konsoldan "bu haftaning vazifalarini ko'rsat" so'roviga MCP orqali javob beradi
+- [x] Yillik maqsaddan kunlik vazifagacha bo'lgan zanjirni yaratish va ko'rish mumkin (S1-07…S1-09, brauzerda sinalgan)
+- [x] Vazifa bajarilganda yuqori darajadagi progress avtomatik yangilanadi (S1-05, UI va MCP orqali sinalgan)
+- [ ] Claude AI konsoldan "bu haftaning vazifalarini ko'rsat" so'roviga MCP orqali javob beradi — QISMAN: MCP tomoni tayyor va protokol darajasida (in-memory va real stdio) sinalgan, lekin real Claude bilan uchidan-uchigacha tekshirilmagan: bu Windows mashinada `claude` CLI o'rnatilmagan (`.env` da `CLAUDE_BIN=claude`, PATH'da yo'q; server health: `spawn claude ENOENT`)
 
 ## Bog'liqliklar
 - S0: DB, server, UI qobig'i, Claude runner
 
 ## Xavflar
 - Ierarxiya juda murakkablashib ketishi mumkin → avval minimal model, keyin kengaytirish
+- Ochiq: DoD 3 real Claude CLI bilan tasdiqlanmagan — Windows mashinada `claude` o'rnatilmagan (`spawn claude ENOENT`). CLI o'rnatilib (yoki `CLAUDE_BIN` to'g'ri yo'lga qo'yilib), "bu haftaning vazifalarini ko'rsat" so'rovi chatda sinalmaguncha sprint yakunlanmaydi
 - Jarayon: vibecoding plugin commit hook'i `.vibecoding/hisobot-ok` tasdiq faylini talab qiladi (gitignore'da); S0 commit'ida hujjatlar hisobotchi tomonidan yangilangani uchun fayl qo'lda yaratilgan
 - Muhit (hal qilindi): Windows mashinaga Node.js 24.20.0 LTS (winget) va pnpm 12.11.2 (npm global) o'rnatildi, `pnpm install --frozen-lockfile` bilan node_modules Windows uchun qayta yig'ildi (`engines.node >=22.12` — mos)
 - Muhit (hal qilindi, 2026-10-17): repoda macOS'dan qolgan AppleDouble `._*` fayllari `pnpm lint` (33 parsing xatosi) va `jarayon-sync` ni buzardi. Foydalanuvchi ruxsati bilan 551 ta `._*` fayl o'chirildi (hammasi `00 05 16 07` sarlavhasi bilan tekshirildi; 271 tasi `.git` ichida edi, `git fsck` toza). Natija: `pnpm lint` 0 xato, `pnpm format:check` toza, sync muvaffaqiyatli

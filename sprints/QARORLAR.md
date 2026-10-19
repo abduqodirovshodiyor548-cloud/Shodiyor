@@ -545,3 +545,40 @@ Format (hisobotchi agent va sinxron skript shunga tayanadi):
 - **Sprint:** S1 (S1-11)
 - **Status:** qabul qilingan
 - **Qaror:** `CommandPalette` AppShell'da; Ctrl+K va Cmd+K `e.code === "KeyK"` bo'yicha — klaviatura tartibidan (masalan kirill) qat'i nazar. Matn qo'shishda darhol tozalanadi (ketma-ket qo'shish uchun), xatoda qaytariladi.
+
+## Q-068: `list_tasks` tool'i rejadan tashqari qo'shildi
+- **Sana:** 2026-10-19
+- **Sprint:** S1 (S1-12)
+- **Status:** qabul qilingan
+- **Kontekst:** Reja 5 ta tool'ni nomlagan edi (list_goals, get_goal_tree, create_task, update_task, update_progress). Rejadan chetlanish.
+- **Qaror:** Oltinchi tool `list_tasks` qo'shildi (davr, status va h.k. filtrlari bilan).
+- **Sabab:** DoD 3 ("bu haftaning vazifalari") uchun zarur; `get_goal_tree` faqat maqsadga bog'langan vazifalarni ko'rsatadi, bog'lanmagan/inbox vazifalar chiqmay qolardi.
+
+## Q-069: MCP natijalari ixcham JSON
+- **Sana:** 2026-10-19
+- **Sprint:** S1 (S1-12)
+- **Status:** qabul qilingan
+- **Qaror:** Tool natijalari ixcham JSON: progress foizda (`progressPercent`), faqat kerakli maydonlar va id'lar, `today` maydoni. To'liq DTO qaytarilmaydi.
+- **Sabab:** Claude kontekstini tejash va o'qishni osonlashtirish.
+
+## Q-070: Nisbiy davr nomlari va server tomonidagi `today`
+- **Sana:** 2026-10-19
+- **Sprint:** S1 (S1-12)
+- **Status:** qabul qilingan
+- **Qaror:** today/tomorrow/this_week/next_week/last_week/this_month/this_quarter/this_year (+ o'zbekcha bugun/ertaga/shu_hafta…) qabul qilinadi; sana server tomonida hisoblanadi va natijada `today` qaytadi.
+- **Sabab:** Claude bugungi sanani ishonchli bilmaydi. Davr mantiqi Q-027…Q-029 (`@loiha/shared`) ga tayanadi.
+
+## Q-071: MCP server bevosita SQLite'ni ochadi (REST'ga HTTP emas)
+- **Sana:** 2026-10-19
+- **Sprint:** S1 (S1-12)
+- **Status:** qabul qilingan
+- **Kontekst:** Q-037 (mantiq `@loiha/db` servislarida), Q-031 (progress keshi).
+- **Qaror:** MCP server o'z jarayonida `getDb()` bilan bir xil SQLite faylini ochadi (WAL — server bilan parallel yozish xavfsiz). `createDashboardMcpServer(db, today?)` — testda in-memory DB va qat'iy sana inject qilinadi. Kirish REST bilan bir xil zod sxemalaridan o'tadi.
+- **Rad etilgan:** MCP'dan REST API'ga HTTP chaqiruv — server ishlamay turganda MCP ham ishlamay qolardi, ikki marta serializatsiya.
+
+## Q-072: MCP xatolari `isError` natijasi sifatida
+- **Sana:** 2026-10-19
+- **Sprint:** S1 (S1-12)
+- **Status:** qabul qilingan
+- **Qaror:** Xatolar exception emas, `isError: true` va tushunarli matn bilan qaytadi. Teglar nom bilan beriladi, yo'qlari yaratiladi (Q-065 kabi), katta-kichik harfga qaramay moslanadi.
+- **Sabab:** Claude xabarni ko'rib, o'zi tuzatib qayta urinishi mumkin. Sinovda topilgan xato ("ish" va "#Ish" ikki marta yaratilmoqchi bo'lib conflict berardi) tuzatildi.
