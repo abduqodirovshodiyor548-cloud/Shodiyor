@@ -1,6 +1,6 @@
 // Avtomatik yaratilgan: node scripts/jarayon-sync.mjs. Qo'lda tahrirlamang.
 window.JARAYON = {
-  "yangilangan": "2026-10-19T06:20:36.880Z",
+  "yangilangan": "2026-10-19T06:45:59.580Z",
   "loyiha": "Lokal AI Dashboard",
   "sprints": [
     {
@@ -173,9 +173,9 @@ window.JARAYON = {
         },
         {
           "id": "S1-05",
-          "title": "Maqsad, key result va vazifalar uchun CRUD endpoint'lar",
+          "title": "Maqsad, key result va vazifalar uchun CRUD endpoint'lar — `/api/goals`, `/api/key-results`, `/api/tasks`, `/api/recurrences`, `/api/tags` (`apps/server/src/routes/planning.ts`); mantiq servis qatlamida `packages/db/src/planning.ts` (`PlanningError` → 404/400/409), zod sxemalari va DTO `packages/shared/src/planning.ts`. Har yozish `recompute*` bilan (Q-031). Tekshirildi: shared 37/37, db 25/25 sinov; typecheck 7/7; lint 0; format toza; server real ishga tushirilib curl bilan sinaldi (yil→kvartal→KR→vazifa zanjiri, progress 0.5 yuqoriga yetdi, 400/404/409/204, haftalik seriya 6 vazifa). Qarorlar: Q-037…Q-042",
           "group": "API",
-          "status": "rejalashtirilgan"
+          "status": "bajarildi"
         },
         {
           "id": "S1-06",
@@ -1223,6 +1223,63 @@ window.JARAYON = {
       "qaror": "`apps/server/src/index.ts` da ishga tushganda va har soatda `materializeRecurrences` chaqiriladi. Lokal bitta foydalanuvchi uchun yetarli.",
       "rad etilgan": "alohida cron / job navbati.",
       "oqibat": "Server real ishga tushirib sinalmagan (faqat sinovlar va typecheck)."
+    },
+    {
+      "id": "Q-037",
+      "sarlavha": "Biznes mantiq @loiha/db servis qatlamida, server faqat HTTP",
+      "sana": "2026-10-19",
+      "sprint": "S1 (S1-05)",
+      "status": "qabul qilingan",
+      "kontekst": "CRUD tekshiruvlari va progress yangilash S1-12 dagi dashboard-mcp da ham kerak.",
+      "qaror": "list/get/create/update/delete (goals, KR, tasks, recurrences, tags) `packages/db/src/planning.ts` da; xatolar `PlanningError` (not_found/invalid/conflict), server ularni 404/400/409 ga o'giradi. Har yozish o'z tranzaksiyasida `recompute*` bilan (Q-031 bajarildi).",
+      "rad etilgan": "mantiqni Hono route'larida yozish (MCP bilan takrorlanardi).",
+      "oqibat": "S1-12 MCP tool'lari planning.ts servislarini chaqirishi kerak."
+    },
+    {
+      "id": "Q-038",
+      "sarlavha": "Enum va API sxemalari @loiha/shared da",
+      "sana": "2026-10-19",
+      "sprint": "S1 (S1-05)",
+      "status": "qabul qilingan",
+      "kontekst": "Web formalari ham bir xil qiymat va tekshiruvlarni ishlatadi.",
+      "qaror": "GOAL_LEVELS/PLAN_LEVELS/GOAL_STATUSES/TASK_STATUSES, zod sxemalari va DTO'lar `packages/shared/src/planning.ts` da; db schema enum'larni re-export qiladi (bitta manba)."
+    },
+    {
+      "id": "Q-039",
+      "sarlavha": "Maqsad ierarxiyasi qat'iy tekshiriladi, davr `date` bilan beriladi",
+      "sana": "2026-10-19",
+      "sprint": "S1 (S1-05)",
+      "status": "qabul qilingan",
+      "kontekst": "Noto'g'ri ota-bola bog'lanishi va sikllarni oldini olish kerak.",
+      "qaror": "Ota darajasi bola darajasidan yuqori (sikl shu bilan istisno), bola davri ota davri ichida; davr o'zgarib bolalar tashqarida qolsa — 409. Darajani PATCH bilan o'zgartirib bo'lmaydi. API'da davr `date` (davr ichidagi istalgan sana) bilan beriladi, server `periodOf` bilan chegaraga keltiradi; vazifa rejasi `plan: {level, date}` → davr boshi."
+    },
+    {
+      "id": "Q-040",
+      "sarlavha": "Vazifada KR berilsa goal_id KR maqsadidan olinadi",
+      "sana": "2026-10-19",
+      "sprint": "S1 (S1-05)",
+      "status": "qabul qilingan",
+      "kontekst": "Vazifaning maqsadi va KR maqsadi mos bo'lishi kerak.",
+      "qaror": "Vazifa/seriyada KR berilsa goal_id KR maqsadidan olinadi (mos kelmasa 400). KR o'chirilsa vazifalar maqsadning to'g'ridan-to'g'ri vazifalariga aylanadi. PATCH'da faqat maqsad o'zgarsa, boshqa maqsadga tegishli KR olib tashlanadi."
+    },
+    {
+      "id": "Q-041",
+      "sarlavha": "PATCH semantikasi",
+      "sana": "2026-10-19",
+      "sprint": "S1 (S1-05)",
+      "status": "qabul qilingan",
+      "kontekst": "Qisman yangilash qoidalarini belgilash kerak edi.",
+      "qaror": "Maydon yo'q — o'zgarmaydi; null — tozalanadi. completed_at status done bo'lganda qo'yiladi, qayta ochilganda tozalanadi. tagIds — to'liq to'plam (almashtiriladi)."
+    },
+    {
+      "id": "Q-042",
+      "sarlavha": "Seriya o'zgarganda kelajakdagi todo takrorlanishlar qayta yaratiladi; o'tmish yaratilmaydi",
+      "sana": "2026-10-19",
+      "sprint": "S1 (S1-05)",
+      "status": "qabul qilingan",
+      "kontekst": "Q-035 seriya o'zgarganda qayta yaratishni talab qildi; o'tmishdagi start_date \"qarz\" vazifalar to'plashi mumkin edi.",
+      "qaror": "Seriya o'zgarganda/to'xtatilganda bugundan boshlab boshlanmagan (todo) takrorlanishlar qayta yaratiladi; o'chirilganda o'tganlari oddiy vazifa bo'lib qoladi. `materializeRecurrences(db, { from, until })` endi `from` (standart bugun) dan oldin vazifa yaratmaydi. Q-035 ni aniqlashtiradi.",
+      "oqibat": "Ma'lum cheklov — qayta yaratilgan todo vazifalardagi qo'lda o'zgarishlar yo'qoladi. S1-06 list endpoint'larga davr filtri va daraxt so'rovlarini qo'shadi."
     }
   ],
   "hisobotlar": [

@@ -310,3 +310,48 @@ Format (hisobotchi agent va sinxron skript shunga tayanadi):
 - **Qaror:** `apps/server/src/index.ts` da ishga tushganda va har soatda `materializeRecurrences` chaqiriladi. Lokal bitta foydalanuvchi uchun yetarli.
 - **Rad etilgan:** alohida cron / job navbati.
 - **Oqibat:** Server real ishga tushirib sinalmagan (faqat sinovlar va typecheck).
+
+## Q-037: Biznes mantiq @loiha/db servis qatlamida, server faqat HTTP
+- **Sana:** 2026-10-19
+- **Sprint:** S1 (S1-05)
+- **Status:** qabul qilingan
+- **Kontekst:** CRUD tekshiruvlari va progress yangilash S1-12 dagi dashboard-mcp da ham kerak.
+- **Qaror:** list/get/create/update/delete (goals, KR, tasks, recurrences, tags) `packages/db/src/planning.ts` da; xatolar `PlanningError` (not_found/invalid/conflict), server ularni 404/400/409 ga o'giradi. Har yozish o'z tranzaksiyasida `recompute*` bilan (Q-031 bajarildi).
+- **Rad etilgan:** mantiqni Hono route'larida yozish (MCP bilan takrorlanardi).
+- **Oqibat:** S1-12 MCP tool'lari planning.ts servislarini chaqirishi kerak.
+
+## Q-038: Enum va API sxemalari @loiha/shared da
+- **Sana:** 2026-10-19
+- **Sprint:** S1 (S1-05)
+- **Status:** qabul qilingan
+- **Kontekst:** Web formalari ham bir xil qiymat va tekshiruvlarni ishlatadi.
+- **Qaror:** GOAL_LEVELS/PLAN_LEVELS/GOAL_STATUSES/TASK_STATUSES, zod sxemalari va DTO'lar `packages/shared/src/planning.ts` da; db schema enum'larni re-export qiladi (bitta manba).
+
+## Q-039: Maqsad ierarxiyasi qat'iy tekshiriladi, davr `date` bilan beriladi
+- **Sana:** 2026-10-19
+- **Sprint:** S1 (S1-05)
+- **Status:** qabul qilingan
+- **Kontekst:** Noto'g'ri ota-bola bog'lanishi va sikllarni oldini olish kerak.
+- **Qaror:** Ota darajasi bola darajasidan yuqori (sikl shu bilan istisno), bola davri ota davri ichida; davr o'zgarib bolalar tashqarida qolsa — 409. Darajani PATCH bilan o'zgartirib bo'lmaydi. API'da davr `date` (davr ichidagi istalgan sana) bilan beriladi, server `periodOf` bilan chegaraga keltiradi; vazifa rejasi `plan: {level, date}` → davr boshi.
+
+## Q-040: Vazifada KR berilsa goal_id KR maqsadidan olinadi
+- **Sana:** 2026-10-19
+- **Sprint:** S1 (S1-05)
+- **Status:** qabul qilingan
+- **Kontekst:** Vazifaning maqsadi va KR maqsadi mos bo'lishi kerak.
+- **Qaror:** Vazifa/seriyada KR berilsa goal_id KR maqsadidan olinadi (mos kelmasa 400). KR o'chirilsa vazifalar maqsadning to'g'ridan-to'g'ri vazifalariga aylanadi. PATCH'da faqat maqsad o'zgarsa, boshqa maqsadga tegishli KR olib tashlanadi.
+
+## Q-041: PATCH semantikasi
+- **Sana:** 2026-10-19
+- **Sprint:** S1 (S1-05)
+- **Status:** qabul qilingan
+- **Kontekst:** Qisman yangilash qoidalarini belgilash kerak edi.
+- **Qaror:** Maydon yo'q — o'zgarmaydi; null — tozalanadi. completed_at status done bo'lganda qo'yiladi, qayta ochilganda tozalanadi. tagIds — to'liq to'plam (almashtiriladi).
+
+## Q-042: Seriya o'zgarganda kelajakdagi todo takrorlanishlar qayta yaratiladi; o'tmish yaratilmaydi
+- **Sana:** 2026-10-19
+- **Sprint:** S1 (S1-05)
+- **Status:** qabul qilingan
+- **Kontekst:** Q-035 seriya o'zgarganda qayta yaratishni talab qildi; o'tmishdagi start_date "qarz" vazifalar to'plashi mumkin edi.
+- **Qaror:** Seriya o'zgarganda/to'xtatilganda bugundan boshlab boshlanmagan (todo) takrorlanishlar qayta yaratiladi; o'chirilganda o'tganlari oddiy vazifa bo'lib qoladi. `materializeRecurrences(db, { from, until })` endi `from` (standart bugun) dan oldin vazifa yaratmaydi. Q-035 ni aniqlashtiradi.
+- **Oqibat:** Ma'lum cheklov — qayta yaratilgan todo vazifalardagi qo'lda o'zgarishlar yo'qoladi. S1-06 list endpoint'larga davr filtri va daraxt so'rovlarini qo'shadi.

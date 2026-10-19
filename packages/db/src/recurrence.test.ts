@@ -30,7 +30,7 @@ beforeEach(() => {
 describe("materializeRecurrences", () => {
   it("kunlik vazifalarni yaratadi va qayta chaqiruvda takrorlamaydi", () => {
     series({ priority: 2, estimateMinutes: 30 });
-    assert.equal(materializeRecurrences(db, "2026-10-21"), 3);
+    assert.equal(materializeRecurrences(db, { from: "2026-01-01", until: "2026-10-21" }), 3);
     assert.deepEqual(dates(), ["2026-10-19", "2026-10-20", "2026-10-21"]);
     const t = db.select().from(tasks).where(eq(tasks.occurrenceDate, "2026-10-20")).get()!;
     assert.equal(t.title, "Yugurish");
@@ -40,23 +40,23 @@ describe("materializeRecurrences", () => {
     assert.equal(t.estimateMinutes, 30);
     assert.equal(t.status, "todo");
 
-    assert.equal(materializeRecurrences(db, "2026-10-21"), 0);
-    assert.equal(materializeRecurrences(db, "2026-10-22"), 1);
+    assert.equal(materializeRecurrences(db, { from: "2026-01-01", until: "2026-10-21" }), 0);
+    assert.equal(materializeRecurrences(db, { from: "2026-01-01", until: "2026-10-22" }), 1);
     assert.equal(db.select().from(taskRecurrences).get()?.generatedUntil, "2026-10-22");
   });
 
   it("o'chirilgan takrorlanish qayta yaratilmaydi", () => {
     series();
-    materializeRecurrences(db, "2026-10-21");
+    materializeRecurrences(db, { from: "2026-01-01", until: "2026-10-21" });
     db.delete(tasks).where(eq(tasks.occurrenceDate, "2026-10-20")).run();
-    materializeRecurrences(db, "2026-10-22");
+    materializeRecurrences(db, { from: "2026-01-01", until: "2026-10-22" });
     assert.deepEqual(dates(), ["2026-10-19", "2026-10-21", "2026-10-22"]);
   });
 
   it("haftalik qoida, end_date va to'xtatilgan seriya", () => {
     series({ rule: { freq: "weekly", interval: 1, weekdays: [1, 4] }, endDate: "2026-10-29" });
     series({ id: "r2", active: false });
-    materializeRecurrences(db, "2026-11-30");
+    materializeRecurrences(db, { from: "2026-01-01", until: "2026-11-30" });
     assert.deepEqual(dates(), ["2026-10-19", "2026-10-22", "2026-10-26", "2026-10-29"]);
     assert.deepEqual(dates("r2"), []);
   });
@@ -67,7 +67,7 @@ describe("materializeRecurrences", () => {
       .run();
     db.insert(tasks).values({ title: "bajarilgan", goalId: "g", status: "done" }).run();
     series({ goalId: "g" });
-    materializeRecurrences(db, "2026-10-19");
+    materializeRecurrences(db, { from: "2026-01-01", until: "2026-10-19" });
     assert.equal(goalP("g"), 0.5);
   });
 });
@@ -75,7 +75,7 @@ describe("materializeRecurrences", () => {
 describe("resetFutureOccurrences", () => {
   it("kelajakdagi todo vazifalarni o'chirib, yangi qoida bo'yicha qayta yaratishga imkon beradi", () => {
     series();
-    materializeRecurrences(db, "2026-10-24");
+    materializeRecurrences(db, { from: "2026-01-01", until: "2026-10-24" });
     db.update(tasks).set({ status: "done" }).where(eq(tasks.occurrenceDate, "2026-10-22")).run();
 
     db.update(taskRecurrences)
@@ -84,16 +84,24 @@ describe("resetFutureOccurrences", () => {
     assert.equal(resetFutureOccurrences(db, "r1", "2026-10-21"), 3); // 21, 23, 24; 22 — bajarilgan, qoladi
     assert.equal(db.select().from(taskRecurrences).get()?.generatedUntil, "2026-10-20");
 
-    materializeRecurrences(db, "2026-10-24");
+    materializeRecurrences(db, { from: "2026-01-01", until: "2026-10-24" });
     assert.deepEqual(dates(), ["2026-10-19", "2026-10-20", "2026-10-21", "2026-10-22", "2026-10-23"]);
   });
 
   it("seriya o'chirilsa vazifalar oddiy vazifa bo'lib qoladi", () => {
     series();
-    materializeRecurrences(db, "2026-10-20");
+    materializeRecurrences(db, { from: "2026-01-01", until: "2026-10-20" });
     db.delete(taskRecurrences).run();
     const all = db.select().from(tasks).all();
     assert.equal(all.length, 2);
     assert.ok(all.every((t) => t.recurrenceId === null && t.occurrenceDate !== null));
+  });
+});
+
+describe("materializeRecurrences: from chegarasi", () => {
+  it("from dan oldingi takrorlanishlar yaratilmaydi (qayta yoqilgan seriya qarz to'plamaydi)", () => {
+    series({ startDate: "2026-10-01" });
+    materializeRecurrences(db, { from: "2026-10-19", until: "2026-10-20" });
+    assert.deepEqual(dates(), ["2026-10-19", "2026-10-20"]);
   });
 });

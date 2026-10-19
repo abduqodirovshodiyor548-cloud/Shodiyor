@@ -21,7 +21,7 @@ Yillik → kvartal → oylik → haftalik → kunlik darajadagi maqsad va vazifa
 - [x] **S1-04** Takrorlanuvchi vazifalar (kunlik, haftalik, maxsus qoida) — `packages/shared/src/recurrence.ts` (recurrenceRuleSchema/recurrenceSchema, occursOn, occurrencesBetween, describeRecurrence), `packages/db/src/recurrence.ts` (materializeRecurrences, resetFutureOccurrences), yangi `task_recurrences` jadvali, `tasks.recurrence_id` + `occurrence_date`, migratsiya `0002_s1_task_recurrences.sql` (ON DELETE set null qo'lda qo'shildi), server ishga tushganda va har soat generatsiya. Tekshirildi: shared 37/37, db 11/11 sinov; typecheck 7/7; lint 0 xato; format toza. Server real ishga tushirib sinalmagan. Eslatma: S1-05 seriya yaratish/o'zgartirishda `resetFutureOccurrences` + `materializeRecurrences` ni chaqirishi shart; S1-12 da `describeRecurrence` ishlatilishi mumkin. Qarorlar: Q-033…Q-036
 
 ### API
-- [ ] **S1-05** Maqsad, key result va vazifalar uchun CRUD endpoint'lar
+- [x] **S1-05** Maqsad, key result va vazifalar uchun CRUD endpoint'lar — `/api/goals`, `/api/key-results`, `/api/tasks`, `/api/recurrences`, `/api/tags` (`apps/server/src/routes/planning.ts`); mantiq servis qatlamida `packages/db/src/planning.ts` (`PlanningError` → 404/400/409), zod sxemalari va DTO `packages/shared/src/planning.ts`. Har yozish `recompute*` bilan (Q-031). Tekshirildi: shared 37/37, db 25/25 sinov; typecheck 7/7; lint 0; format toza; server real ishga tushirilib curl bilan sinaldi (yil→kvartal→KR→vazifa zanjiri, progress 0.5 yuqoriga yetdi, 400/404/409/204, haftalik seriya 6 vazifa). Qarorlar: Q-037…Q-042
 - [ ] **S1-06** Davr bo'yicha filtr va daraxt ko'rinishidagi so'rovlar
 
 ### UI

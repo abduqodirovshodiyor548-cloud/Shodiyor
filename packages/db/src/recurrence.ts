@@ -14,18 +14,26 @@ export const RECURRENCE_HORIZON_DAYS = 14;
 /**
  * Faol seriyalar uchun `until` sanasigacha (kiradi) yetishmagan vazifalarni yaratadi.
  * Har seriya `generated_until` dan keyingi kundan davom etadi, shuning uchun foydalanuvchi o'chirgan
- * takrorlanish qayta paydo bo'lmaydi. Yaratilgan vazifalar soni qaytariladi.
+ * takrorlanish qayta paydo bo'lmaydi. `from` (standart: bugun) dan oldingi sanalar yaratilmaydi — o'tmishdagi
+ * `start_date` yoki to'xtatilib qayta yoqilgan seriya "qarz" vazifalar to'plamaydi. Yaratilgan vazifalar soni qaytariladi.
  */
 export function materializeRecurrences(
   db: Db,
-  until: string = addDays(toLocalIsoDate(), RECURRENCE_HORIZON_DAYS - 1),
+  {
+    from = toLocalIsoDate(),
+    until = addDays(from, RECURRENCE_HORIZON_DAYS - 1),
+  }: { from?: string; until?: string } = {},
 ): number {
   return db.transaction((tx) => {
     let created = 0;
     for (const r of tx.select().from(taskRecurrences).where(eq(taskRecurrences.active, true)).all()) {
       if (r.generatedUntil !== null && r.generatedUntil >= until) continue;
-      const from = r.generatedUntil === null ? r.startDate : addDays(r.generatedUntil, 1);
-      const dates = occurrencesBetween({ rule: r.rule, start: r.startDate, end: r.endDate }, from, until);
+      const next = r.generatedUntil === null ? r.startDate : addDays(r.generatedUntil, 1);
+      const dates = occurrencesBetween(
+        { rule: r.rule, start: r.startDate, end: r.endDate },
+        next > from ? next : from,
+        until,
+      );
       let inserted = 0;
       for (const date of dates) {
         inserted += tx

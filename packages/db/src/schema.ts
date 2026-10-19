@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import type { RecurrenceRule } from "@loiha/shared";
+import { GOAL_LEVELS, GOAL_STATUSES, PLAN_LEVELS, TASK_STATUSES, type RecurrenceRule } from "@loiha/shared";
 import { sql } from "drizzle-orm";
 import {
   check,
@@ -72,19 +72,9 @@ export type JobEvent = typeof jobEvents.$inferSelect;
 
 // ─── Maqsadlar va vazifalar (S1) ───────────────────────────────────────────────
 
-/** Maqsad darajalari: yuqoridan pastga. Kunlik daraja — vazifalar (`tasks`). */
-export const GOAL_LEVELS = ["year", "quarter", "month", "week"] as const;
-export type GoalLevel = (typeof GOAL_LEVELS)[number];
-
-/** Vazifa rejalashtirilgan davr darajasi: aniq kun, yoki hafta/oy ichida kun belgilanmagan. */
-export const PLAN_LEVELS = ["day", "week", "month"] as const;
-export type PlanLevel = (typeof PLAN_LEVELS)[number];
-
-export const GOAL_STATUSES = ["active", "done", "dropped"] as const;
-export type GoalStatus = (typeof GOAL_STATUSES)[number];
-
-export const TASK_STATUSES = ["todo", "in_progress", "done", "cancelled"] as const;
-export type TaskStatus = (typeof TASK_STATUSES)[number];
+// Enum qiymatlari @loiha/shared da (API sxemalari bilan bitta manba).
+export { GOAL_LEVELS, GOAL_STATUSES, PLAN_LEVELS, TASK_STATUSES };
+export type { GoalLevel, GoalStatus, PlanLevel, TaskStatus } from "@loiha/shared";
 
 const uuid = (name: string) => text(name).$defaultFn(() => randomUUID());
 const updatedAt = () =>
