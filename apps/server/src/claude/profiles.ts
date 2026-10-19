@@ -1,6 +1,6 @@
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { ROOT_DIR } from "@loiha/config";
+import { ROOT_DIR, config } from "@loiha/config";
 import type { ClaudeProfile } from "@loiha/shared";
 
 interface McpServerSpec {
@@ -22,9 +22,12 @@ export interface ProfileSpec {
   appendSystemPrompt?: string;
 }
 
+// node + tsx CLI: `node_modules/.bin/tsx` Windows'da shell skript (tsx.cmd) — Claude CLI uni to'g'ridan-to'g'ri ishga tushira olmaydi.
 const dashboardMcp: McpServerSpec = {
-  command: join(ROOT_DIR, "node_modules", ".bin", "tsx"),
-  args: [join(ROOT_DIR, "packages", "mcp", "src", "bin.ts")],
+  command: process.execPath,
+  args: [join(ROOT_DIR, "node_modules", "tsx", "dist", "cli.mjs"), join(ROOT_DIR, "packages", "mcp", "src", "bin.ts")],
+  // Claude CLI MCP serverga muhitni to'liq uzatmaydi — MCP server bilan bir xil bazani ochishi aniq ko'rsatiladi.
+  env: { DATABASE_PATH: config.databasePath },
 };
 
 const BASE_PROMPT =

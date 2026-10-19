@@ -4,7 +4,11 @@ import { promisify } from "node:util";
 import { config } from "@loiha/config";
 import type { ClaudeProfile, JobEventData } from "@loiha/shared";
 import { getProfile, writeMcpConfig } from "./profiles.ts";
+import { resolveClaudeBin } from "./resolveBin.ts";
 import { parseStreamMessage } from "./stream.ts";
+
+/** Windows'da `claude` → claude.exe (resolveBin.ts). */
+const claudeBin = resolveClaudeBin(config.claude.bin);
 
 export interface ClaudeInfo {
   bin: string;
@@ -13,17 +17,17 @@ export interface ClaudeInfo {
   error?: string;
 }
 
-let info: ClaudeInfo = { bin: config.claude.bin, available: false, version: null, error: "Hali tekshirilmagan" };
+let info: ClaudeInfo = { bin: claudeBin, available: false, version: null, error: "Hali tekshirilmagan" };
 
 export async function detectClaude(): Promise<ClaudeInfo> {
   try {
-    const { stdout } = await promisify(execFile)(config.claude.bin, ["--version"], {
+    const { stdout } = await promisify(execFile)(claudeBin, ["--version"], {
       timeout: 15_000,
       env: childEnv(),
     });
-    info = { bin: config.claude.bin, available: true, version: stdout.trim() };
+    info = { bin: claudeBin, available: true, version: stdout.trim() };
   } catch (err) {
-    info = { bin: config.claude.bin, available: false, version: null, error: (err as Error).message };
+    info = { bin: claudeBin, available: false, version: null, error: (err as Error).message };
   }
   return info;
 }
@@ -80,7 +84,7 @@ export function runClaude(opts: RunClaudeOptions): Promise<RunClaudeResult> {
   return new Promise((resolve, reject) => {
     if (opts.signal.aborted) return reject(opts.signal.reason);
 
-    const child = spawn(config.claude.bin, args, { cwd: opts.cwd, env: childEnv(), stdio: ["pipe", "pipe", "pipe"] });
+    const child = spawn(claudeBin, args, { cwd: opts.cwd, env: childEnv(), stdio: ["pipe", "pipe", "pipe"] });
     let result: Extract<JobEventData, { type: "result" }> | undefined;
     let sessionId: string | null = opts.resumeSessionId ?? opts.sessionId;
     let stderrTail = "";
@@ -117,7 +121,7 @@ export function runClaude(opts: RunClaudeOptions): Promise<RunClaudeResult> {
 
     child.on("error", (err) => {
       opts.signal.removeEventListener("abort", onAbort);
-      reject(new Error(`Claude CLI ishga tushmadi (${config.claude.bin}): ${err.message}`));
+      reject(new Error(`Claude CLI ishga tushmadi (${claudeBin}): ${err.message}`));
     });
 
     child.on("close", (code, sig) => {

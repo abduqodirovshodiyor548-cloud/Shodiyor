@@ -1,6 +1,6 @@
 // Avtomatik yaratilgan: node scripts/jarayon-sync.mjs. Qo'lda tahrirlamang.
 window.JARAYON = {
-  "yangilangan": "2026-10-19T09:52:41.602Z",
+  "yangilangan": "2026-10-19T10:08:37.775Z",
   "loyiha": "Lokal AI Dashboard",
   "sprints": [
     {
@@ -126,9 +126,9 @@ window.JARAYON = {
     {
       "id": "S1",
       "nomi": "Maqsadlar va vazifalar tizimi",
-      "status": "jarayonda",
+      "status": "yakunlangan",
       "boshlanish": "2026-10-17",
-      "tugash": "2026-10-30",
+      "tugash": "2026-10-19",
       "davomiylik": "2 hafta",
       "fayl": "sprints/sprint-01-maqsadlar.md",
       "maqsad": "Yillik → kvartal → oylik → haftalik → kunlik darajadagi maqsad va vazifalar tizimini qo'lda to'liq boshqarish imkoniyati. Claude bu ma'lumotlar bilan MCP orqali ishlay oladi.",
@@ -142,8 +142,8 @@ window.JARAYON = {
           "done": true
         },
         {
-          "text": "Claude AI konsoldan \"bu haftaning vazifalarini ko'rsat\" so'roviga MCP orqali javob beradi — QISMAN: MCP tomoni tayyor va protokol darajasida (in-memory va real stdio) sinalgan, lekin real Claude bilan uchidan-uchigacha tekshirilmagan: bu Windows mashinada `claude` CLI o'rnatilmagan (`.env` da `CLAUDE_BIN=claude`, PATH'da yo'q; server health: `spawn claude ENOENT`)",
-          "done": false
+          "text": "Claude AI konsoldan \"bu haftaning vazifalarini ko'rsat\" so'roviga MCP orqali javob beradi — 2026-10-19: Claude CLI 2.1.303 (Pro login), test bazasida (`data/test-s1.db`) AI konsoldan so'rov yuborildi; Claude (claude-opus-5-5) `mcp__dashboard__list_tasks` ni chaqirib 12 vazifani kunlar bo'yicha o'zbekcha ko'rsatdi; job tayyor, $0.079, 20s, mcp: dashboard connected",
+          "done": true
         }
       ],
       "tasks": [
@@ -1567,6 +1567,35 @@ window.JARAYON = {
       "status": "qabul qilingan",
       "qaror": "Xatolar exception emas, `isError: true` va tushunarli matn bilan qaytadi. Teglar nom bilan beriladi, yo'qlari yaratiladi (Q-065 kabi), katta-kichik harfga qaramay moslanadi.",
       "sabab": "Claude xabarni ko'rib, o'zi tuzatib qayta urinishi mumkin. Sinovda topilgan xato (\"ish\" va \"#Ish\" ikki marta yaratilmoqchi bo'lib conflict berardi) tuzatildi."
+    },
+    {
+      "id": "Q-073",
+      "sarlavha": "Claude CLI yo'li Windows'da avtomatik aniqlanadi, `shell: true` ishlatilmaydi",
+      "sana": "2026-10-19",
+      "sprint": "S1 (DoD 3)",
+      "status": "qabul qilingan",
+      "kontekst": "Windows'da `spawn(\"claude\")` npm o'rnatgan `claude.cmd` shim'ini topmaydi (`spawn claude ENOENT`).",
+      "qaror": "`apps/server/src/claude/resolveBin.ts` (`resolveClaudeBin`) nomni PATH bo'yicha `claude.exe` ga yoki shim yonidagi `node_modules/@anthropic-ai/claude-code/bin/claude.exe` ga aylantiradi; `runner.ts` shundan foydalanadi. `.env` dagi `CLAUDE_BIN=claude` o'zgarishsiz qoladi.",
+      "rad etilgan": "`shell: true` — shell promptdagi maxsus belgilarni buzishi va inyeksiya xavfi bor."
+    },
+    {
+      "id": "Q-074",
+      "sarlavha": "MCP server node + tsx CLI orqali ishga tushiriladi, `DATABASE_PATH` aniq uzatiladi",
+      "sana": "2026-10-19",
+      "sprint": "S1 (DoD 3)",
+      "status": "qabul qilingan",
+      "kontekst": "Q-071 (MCP bevosita SQLite'ni ochadi). `node_modules/.bin/tsx` Windows'da shell skript; Claude CLI MCP serverga muhitni to'liq uzatmaydi.",
+      "qaror": "`profiles.ts` da buyruq `process.execPath` + `node_modules/tsx/dist/cli.mjs` (platformadan mustaqil); MCP spec'ga `env: { DATABASE_PATH: config.databasePath }` qo'shildi.",
+      "sabab": "server va MCP har doim bitta bazada ishlashi shart, aks holda MCP boshqa bazani ochishi mumkin edi."
+    },
+    {
+      "id": "Q-075",
+      "sarlavha": "Brauzer/AI sinovlari uchun alohida test bazasi",
+      "sana": "2026-10-19",
+      "sprint": "S1 (DoD 3)",
+      "status": "qabul qilingan",
+      "qaror": "Sinovlar `data/test-s1.db` (+ `data/dev-test.mjs`, gitignore ostida) bilan o'tkaziladi; real `data/dashboard.db` ga tegilmaydi (17-oktabrdan beri o'zgarmagan).",
+      "sabab": "sinov ma'lumotlari va AI yozuvlari real ma'lumotni buzmasligi kerak."
     }
   ],
   "hisobotlar": [
@@ -1576,6 +1605,13 @@ window.JARAYON = {
       "status": "yakunlangan",
       "fayl": "sprints/hisobotlar/sprint-00-hisobot.md",
       "xulosa": "Maqsadga erishildi: monorepo, SQLite/Drizzle, Hono server, job navbati, Claude CLI runner (stream-json + SSE), dashboard-mcp skeleti va web UI (AI konsol) tayyor. Barcha 15 vazifa va 4/4 qabul mezoni bajarildi. Sprint rejadagi 2026-10-22 o'rniga 2026-10-17 da yakunlandi (5 kun oldin). Bitta bloker (Claude CLI 401 login) bo'ldi va yechildi."
+    },
+    {
+      "sprint": "S1",
+      "sana": "2026-10-19",
+      "status": "yakunlangan",
+      "fayl": "sprints/hisobotlar/sprint-01-hisobot.md",
+      "xulosa": "Maqsad bajarildi: yil → kvartal → oy → hafta → kun darajasidagi maqsad va vazifalarni qo'lda to'liq boshqarish (ma'lumot modeli, API, UI) va Claude'ning MCP orqali shu ma'lumotlar bilan ishlashi tayyor. Barcha 12 vazifa va 3/3 qabul mezoni bajarildi. Sprint rejadagi 2026-10-30 o'rniga 2026-10-19 da yakunlandi (11 kun oldin). Oxirgi mezon (DoD 3) real Claude CLI bilan tasdiqlangach yopildi; buning uchun Windows'ga xos ikki muammo tuzatildi (kod hali commit qilinmagan)."
     }
   ]
 };

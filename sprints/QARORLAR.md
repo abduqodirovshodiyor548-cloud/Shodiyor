@@ -582,3 +582,26 @@ Format (hisobotchi agent va sinxron skript shunga tayanadi):
 - **Status:** qabul qilingan
 - **Qaror:** Xatolar exception emas, `isError: true` va tushunarli matn bilan qaytadi. Teglar nom bilan beriladi, yo'qlari yaratiladi (Q-065 kabi), katta-kichik harfga qaramay moslanadi.
 - **Sabab:** Claude xabarni ko'rib, o'zi tuzatib qayta urinishi mumkin. Sinovda topilgan xato ("ish" va "#Ish" ikki marta yaratilmoqchi bo'lib conflict berardi) tuzatildi.
+
+## Q-073: Claude CLI yo'li Windows'da avtomatik aniqlanadi, `shell: true` ishlatilmaydi
+- **Sana:** 2026-10-19
+- **Sprint:** S1 (DoD 3)
+- **Status:** qabul qilingan
+- **Kontekst:** Windows'da `spawn("claude")` npm o'rnatgan `claude.cmd` shim'ini topmaydi (`spawn claude ENOENT`).
+- **Qaror:** `apps/server/src/claude/resolveBin.ts` (`resolveClaudeBin`) nomni PATH bo'yicha `claude.exe` ga yoki shim yonidagi `node_modules/@anthropic-ai/claude-code/bin/claude.exe` ga aylantiradi; `runner.ts` shundan foydalanadi. `.env` dagi `CLAUDE_BIN=claude` o'zgarishsiz qoladi.
+- **Rad etilgan:** `shell: true` — shell promptdagi maxsus belgilarni buzishi va inyeksiya xavfi bor.
+
+## Q-074: MCP server node + tsx CLI orqali ishga tushiriladi, `DATABASE_PATH` aniq uzatiladi
+- **Sana:** 2026-10-19
+- **Sprint:** S1 (DoD 3)
+- **Status:** qabul qilingan
+- **Kontekst:** Q-071 (MCP bevosita SQLite'ni ochadi). `node_modules/.bin/tsx` Windows'da shell skript; Claude CLI MCP serverga muhitni to'liq uzatmaydi.
+- **Qaror:** `profiles.ts` da buyruq `process.execPath` + `node_modules/tsx/dist/cli.mjs` (platformadan mustaqil); MCP spec'ga `env: { DATABASE_PATH: config.databasePath }` qo'shildi.
+- **Sabab:** server va MCP har doim bitta bazada ishlashi shart, aks holda MCP boshqa bazani ochishi mumkin edi.
+
+## Q-075: Brauzer/AI sinovlari uchun alohida test bazasi
+- **Sana:** 2026-10-19
+- **Sprint:** S1 (DoD 3)
+- **Status:** qabul qilingan
+- **Qaror:** Sinovlar `data/test-s1.db` (+ `data/dev-test.mjs`, gitignore ostida) bilan o'tkaziladi; real `data/dashboard.db` ga tegilmaydi (17-oktabrdan beri o'zgarmagan).
+- **Sabab:** sinov ma'lumotlari va AI yozuvlari real ma'lumotni buzmasligi kerak.
