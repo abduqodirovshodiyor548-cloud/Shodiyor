@@ -1,6 +1,6 @@
 // Avtomatik yaratilgan: node scripts/jarayon-sync.mjs. Qo'lda tahrirlamang.
 window.JARAYON = {
-  "yangilangan": "2026-10-19T09:37:29.610Z",
+  "yangilangan": "2026-10-19T09:46:17.251Z",
   "loyiha": "Lokal AI Dashboard",
   "sprints": [
     {
@@ -209,9 +209,9 @@ window.JARAYON = {
         },
         {
           "id": "S1-11",
-          "title": "Ustuvorlik, teglar, qidiruv va tezkor qo'shish (Cmd+K)",
+          "title": "Ustuvorlik, teglar, qidiruv va tezkor qo'shish (Cmd+K) — backend: `GET /api/tasks?q=&tagId=` va `GET /api/goals?q=` (LIKE, ESCAPE); `packages/shared/src/quickAdd.ts` (`parseQuickAdd`: #teg, !1–3, @reja); web: `components/CommandPalette.tsx` (Ctrl/Cmd+K), `routes/goals/tags.tsx` (TagChip, TagPicker), TaskSheet'da teglar, oy/hafta'da teg filtri. Ustuvorlik UI avval S1-08 da bor edi. Tekshirildi: typecheck 7/7, lint 0, shared 42/42, db 40/40, brauzerda (mobil 375px). Sinov paytida topilgan xato (palitrada matn kech tozalanishi) tuzatildi. Qarorlar: Q-063…Q-067",
           "group": "UI",
-          "status": "rejalashtirilgan"
+          "status": "bajarildi"
         },
         {
           "id": "S1-12",
@@ -1474,6 +1474,52 @@ window.JARAYON = {
       "status": "qabul qilingan",
       "kontekst": "Q-055, Q-057.",
       "qaror": "\"Fokus\" bo'limiga tashlash focus=true, \"Boshqa vazifalar\"ga — focus=false qo'yadi va reja kunini ham shu kunga o'rnatadi."
+    },
+    {
+      "id": "Q-063",
+      "sarlavha": "Tezkor qo'shish sintaksisi — oddiy belgilar, `@loiha/shared` da",
+      "sana": "2026-10-19",
+      "sprint": "S1 (S1-11)",
+      "status": "qabul qilingan",
+      "kontekst": "Cmd+K palitrasidan vazifani bir qatorda tez qo'shish kerak edi.",
+      "qaror": "`parseQuickAdd(text, today, defaultPlan)` (`packages/shared/src/quickAdd.ts`): `#teg` (o'zbekcha apostroflar bilan, takrorlar bir marta), `!1/!2/!3` ustuvorlik, `@bugun/@ertaga/@indinga/@hafta/@oy/@inbox/@dushanba…@yakshanba/@YYYY-MM-DD`; tanilmagan belgilar nomda qoladi. Standart reja — bugun (palitra kundalik qo'shish uchun). Tahlil shared'da, shuning uchun S1-12 MCP va S4 Telegram bot qayta ishlatishi mumkin.",
+      "rad etilgan": "tabiiy til tahlili (Claude chaqiruvi) — sekin va oddiy lokal holat uchun ortiqcha; chrono kabi kutubxona — o'zbek tilini bilmaydi.",
+      "oqibat": "S1-12 `create_task` va S4 bot shu sintaksisni qabul qilishi mumkin."
+    },
+    {
+      "id": "Q-064",
+      "sarlavha": "Qidiruv — SQLite LIKE, FTS5 emas",
+      "sana": "2026-10-19",
+      "sprint": "S1 (S1-11)",
+      "status": "qabul qilingan",
+      "qaror": "`GET /api/tasks?q=` va `GET /api/goals?q=` nom va izoh bo'yicha LIKE; `% _ \\` so'zma-so'z (ESCAPE bilan).",
+      "sabab": "Bitta foydalanuvchi hajmi; virtual jadval/trigger kerak emas; LIKE ASCII'da katta-kichikni farqlamaydi — lotin o'zbek yozuvi uchun yetarli.",
+      "oqibat": "Hajm oshsa FTS5 ga o'tish mumkin."
+    },
+    {
+      "id": "Q-065",
+      "sarlavha": "Palitrada yo'q teglar avtomatik yaratiladi",
+      "sana": "2026-10-19",
+      "sprint": "S1 (S1-11)",
+      "status": "qabul qilingan",
+      "kontekst": "Q-026 (teg nomi yagonaligi).",
+      "qaror": "Tezkor qo'shishdagi mavjud bo'lmagan teglar yaratiladi; nom katta-kichik harfga qaramay mavjudiga moslanadi."
+    },
+    {
+      "id": "Q-066",
+      "sarlavha": "Teg filtri oy/hafta ko'rinishida mijoz tomonida",
+      "sana": "2026-10-19",
+      "sprint": "S1 (S1-11)",
+      "status": "qabul qilingan",
+      "qaror": "\"Barcha teglar\" filtri yuklangan davr vazifalari ichida mijozda ishlaydi; serverdagi `tagId` filtri qidiruv/MCP uchun."
+    },
+    {
+      "id": "Q-067",
+      "sarlavha": "Palitra global, `e.code` bo'yicha",
+      "sana": "2026-10-19",
+      "sprint": "S1 (S1-11)",
+      "status": "qabul qilingan",
+      "qaror": "`CommandPalette` AppShell'da; Ctrl+K va Cmd+K `e.code === \"KeyK\"` bo'yicha — klaviatura tartibidan (masalan kirill) qat'i nazar. Matn qo'shishda darhol tozalanadi (ketma-ket qo'shish uchun), xatoda qaytariladi."
     }
   ],
   "hisobotlar": [

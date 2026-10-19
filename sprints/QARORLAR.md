@@ -509,3 +509,39 @@ Format (hisobotchi agent va sinxron skript shunga tayanadi):
 - **Status:** qabul qilingan
 - **Kontekst:** Q-055, Q-057.
 - **Qaror:** "Fokus" bo'limiga tashlash focus=true, "Boshqa vazifalar"ga — focus=false qo'yadi va reja kunini ham shu kunga o'rnatadi.
+
+## Q-063: Tezkor qo'shish sintaksisi — oddiy belgilar, `@loiha/shared` da
+- **Sana:** 2026-10-19
+- **Sprint:** S1 (S1-11)
+- **Status:** qabul qilingan
+- **Kontekst:** Cmd+K palitrasidan vazifani bir qatorda tez qo'shish kerak edi.
+- **Qaror:** `parseQuickAdd(text, today, defaultPlan)` (`packages/shared/src/quickAdd.ts`): `#teg` (o'zbekcha apostroflar bilan, takrorlar bir marta), `!1/!2/!3` ustuvorlik, `@bugun/@ertaga/@indinga/@hafta/@oy/@inbox/@dushanba…@yakshanba/@YYYY-MM-DD`; tanilmagan belgilar nomda qoladi. Standart reja — bugun (palitra kundalik qo'shish uchun). Tahlil shared'da, shuning uchun S1-12 MCP va S4 Telegram bot qayta ishlatishi mumkin.
+- **Rad etilgan:** tabiiy til tahlili (Claude chaqiruvi) — sekin va oddiy lokal holat uchun ortiqcha; chrono kabi kutubxona — o'zbek tilini bilmaydi.
+- **Oqibat:** S1-12 `create_task` va S4 bot shu sintaksisni qabul qilishi mumkin.
+
+## Q-064: Qidiruv — SQLite LIKE, FTS5 emas
+- **Sana:** 2026-10-19
+- **Sprint:** S1 (S1-11)
+- **Status:** qabul qilingan
+- **Qaror:** `GET /api/tasks?q=` va `GET /api/goals?q=` nom va izoh bo'yicha LIKE; `% _ \` so'zma-so'z (ESCAPE bilan).
+- **Sabab:** Bitta foydalanuvchi hajmi; virtual jadval/trigger kerak emas; LIKE ASCII'da katta-kichikni farqlamaydi — lotin o'zbek yozuvi uchun yetarli.
+- **Oqibat:** Hajm oshsa FTS5 ga o'tish mumkin.
+
+## Q-065: Palitrada yo'q teglar avtomatik yaratiladi
+- **Sana:** 2026-10-19
+- **Sprint:** S1 (S1-11)
+- **Status:** qabul qilingan
+- **Kontekst:** Q-026 (teg nomi yagonaligi).
+- **Qaror:** Tezkor qo'shishdagi mavjud bo'lmagan teglar yaratiladi; nom katta-kichik harfga qaramay mavjudiga moslanadi.
+
+## Q-066: Teg filtri oy/hafta ko'rinishida mijoz tomonida
+- **Sana:** 2026-10-19
+- **Sprint:** S1 (S1-11)
+- **Status:** qabul qilingan
+- **Qaror:** "Barcha teglar" filtri yuklangan davr vazifalari ichida mijozda ishlaydi; serverdagi `tagId` filtri qidiruv/MCP uchun.
+
+## Q-067: Palitra global, `e.code` bo'yicha
+- **Sana:** 2026-10-19
+- **Sprint:** S1 (S1-11)
+- **Status:** qabul qilingan
+- **Qaror:** `CommandPalette` AppShell'da; Ctrl+K va Cmd+K `e.code === "KeyK"` bo'yicha — klaviatura tartibidan (masalan kirill) qat'i nazar. Matn qo'shishda darhol tozalanadi (ketma-ket qo'shish uchun), xatoda qaytariladi.

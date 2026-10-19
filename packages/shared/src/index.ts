@@ -79,3 +79,4 @@ export * from "./period.ts";
 export * from "./progress.ts";
 export * from "./recurrence.ts";
 export * from "./planning.ts";
+export * from "./quickAdd.ts";

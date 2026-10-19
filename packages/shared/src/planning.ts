@@ -110,6 +110,9 @@ const csvEnum = <T extends readonly [string, ...string[]]>(values: T) =>
     .transform((s) => s.split(",").filter(Boolean))
     .pipe(z.array(z.enum(values)).min(1));
 
+/** Matnli qidiruv (S1-11): nom va izoh ichida, katta-kichik harfga qaramay. */
+const searchField = z.string().trim().min(1).max(200).optional();
+
 const periodFilterFields = {
   period: z
     .string()
@@ -139,6 +142,7 @@ export const listGoalsQuerySchema = z
     status: csvEnum(GOAL_STATUSES).optional(),
     /** `root` — ota maqsadi yo'qlar. */
     parentId: z.union([z.literal("root"), id]).optional(),
+    q: searchField,
     ...periodFilterFields,
   })
   .refine(periodFilterValid, periodFilterMessage);
@@ -153,6 +157,8 @@ export const listTasksQuerySchema = z
     planLevel: csvEnum(PLAN_LEVELS).optional(),
     /** `true` — faqat rejalashtirilmagan (inbox) vazifalar. Davr filtri bilan birga berilmaydi. */
     unplanned: queryBool.optional(),
+    q: searchField,
+    tagId: id.optional(),
     ...periodFilterFields,
     limit: z.coerce.number().int().min(1).max(1000).default(200),
   })

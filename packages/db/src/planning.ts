@@ -30,6 +30,7 @@ import {
   type UpdateTagInput,
   type UpdateTaskInput,
 } from "@loiha/shared";
+import type { AnySQLiteColumn } from "drizzle-orm/sqlite-core";
 import type { Db } from "./index.ts";
 import { recomputeForTask, recomputeFromKeyResult, recomputeGoalUpwards, type Tx } from "./progress.ts";
 import { materializeRecurrences, resetFutureOccurrences } from "./recurrence.ts";
@@ -193,6 +194,15 @@ function planColumns(plan: TaskPlanInput | null | undefined) {
   return { planLevel: plan.level, planStart: periodOf(plan.level, plan.date).start };
 }
 
+/**
+ * `LIKE` qidiruvi: `%`, `_` va `\` belgilari so'zma-so'z qidiriladi.
+ * SQLite LIKE faqat ASCII harflarda katta-kichikni farqlamaydi — lotin o'zbek yozuvi uchun yetarli.
+ */
+function textSearch(q: string, ...columns: AnySQLiteColumn[]): SQL {
+  const pattern = `%${q.replace(/[\\%_]/g, (c) => "\\" + c)}%`;
+  return or(...columns.map((c) => sql`${c} LIKE ${pattern} ESCAPE '\\'`))!;
+}
+
 // ---------- Maqsadlar ----------
 
 /** Davr bilan kesishadigan maqsadlar: `period_start <= end AND period_end >= start`. */
@@ -209,6 +219,7 @@ export function listGoals(db: Db, query: ListGoalsQuery = {}): GoalDto[] {
   const where = goalFilter(query);
   if (query.parentId === "root") where.push(isNull(goals.parentId));
   else if (query.parentId) where.push(eq(goals.parentId, query.parentId));
+  if (query.q) where.push(textSearch(query.q, goals.title, goals.description));
   return db
     .select()
     .from(goals)
@@ -396,6 +407,12 @@ export function listTasks(db: Db, query: ListTasksQuery): TaskDto[] {
   if (query.status) where.push(inArray(tasks.status, query.status));
   if (query.planLevel) where.push(inArray(tasks.planLevel, query.planLevel));
   if (query.unplanned) where.push(isNull(tasks.planLevel));
+  if (query.q) where.push(textSearch(query.q, tasks.title, tasks.notes));
+  if (query.tagId) {
+    where.push(
+      inArray(tasks.id, db.select({ id: taskTags.taskId }).from(taskTags).where(eq(taskTags.tagId, query.tagId))),
+    );
+  }
   const range = periodRange(query);
   if (range) where.push(planOverlaps(range));
   const rows = db

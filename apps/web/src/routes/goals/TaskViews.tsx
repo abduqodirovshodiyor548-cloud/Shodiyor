@@ -13,10 +13,11 @@ import {
   type TaskStatus,
 } from "@loiha/shared";
 import { Button, Input } from "@/components/ui";
-import { planningApi, usePlanningMutation } from "@/lib/planning";
+import { planningApi, usePlanningMutation, useTags } from "@/lib/planning";
 import { cn } from "@/lib/utils";
 import { useDraggableTask, useDropTarget, type DropTarget } from "./dnd";
 import { PRIORITIES, TASK_STATUS_LABEL, dayTitle, periodTitle, planShort } from "./labels";
+import { TagChip } from "./tags";
 import type { TaskTarget } from "./TaskSheet";
 
 // S1-08: oy va hafta ko'rinishlaridagi vazifalar — kanban (holat bo'yicha) va ro'yxat (reja davri bo'yicha).
@@ -55,8 +56,13 @@ function TaskMeta({ task, goals, showPlan }: { task: TaskDto; goals: GoalTreeNod
   const goal = task.goalId ? goals.find((g) => g.id === task.goalId) : undefined;
   const kr = task.keyResultId ? goal?.keyResults.find((k) => k.id === task.keyResultId) : undefined;
   const plan = showPlan ? planShort(task) : null;
+  const tags = useTags();
   const items: ReactNode[] = [];
   if (plan) items.push(<span key="plan">{plan}</span>);
+  for (const id of task.tagIds) {
+    const tag = tags.data?.find((t) => t.id === id);
+    if (tag) items.push(<TagChip key={id} tag={tag} />);
+  }
   if (goal)
     items.push(
       <span key="goal" className="truncate">

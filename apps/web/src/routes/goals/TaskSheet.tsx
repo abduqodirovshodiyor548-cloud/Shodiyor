@@ -12,6 +12,7 @@ import {
 import { Badge, Button, Field, Input, Select, Sheet, Textarea } from "@/components/ui";
 import { planningApi, usePlanningMutation } from "@/lib/planning";
 import { LEVEL_LABEL, PLAN_LEVEL_LABEL, PRIORITIES, TASK_STATUS_LABEL } from "./labels";
+import { TagPicker } from "./tags";
 
 export type TaskTarget = { kind: "edit"; id: string } | { kind: "create"; plan: TaskPlanInput | null; goalId?: string };
 
@@ -54,6 +55,7 @@ interface FormState {
   estimate: string;
   dueDate: string;
   focus: boolean;
+  tagIds: string[];
 }
 
 function initialState(task?: TaskDto, initial?: Extract<TaskTarget, { kind: "create" }>): FormState {
@@ -69,6 +71,7 @@ function initialState(task?: TaskDto, initial?: Extract<TaskTarget, { kind: "cre
     estimate: task?.estimateMinutes ? String(task.estimateMinutes) : "",
     dueDate: task?.dueDate ?? "",
     focus: task?.focus ?? false,
+    tagIds: task?.tagIds ?? [],
   };
 }
 
@@ -113,6 +116,7 @@ function TaskForm({
         estimateMinutes: estimate,
         dueDate: form.dueDate || null,
         focus: form.focus,
+        tagIds: form.tagIds,
       },
       { onSuccess: onDone },
     );
@@ -174,6 +178,9 @@ function TaskForm({
           />
         </Field>
       </div>
+      <Field label="Teglar">
+        <TagPicker value={form.tagIds} onChange={(ids) => set("tagIds", ids)} />
+      </Field>
       <Field label="Maqsad">
         <Select
           value={form.goalId}

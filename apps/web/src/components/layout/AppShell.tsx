@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useCallback, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   BookOpen,
@@ -8,6 +8,7 @@ import {
   Menu,
   Monitor,
   Moon,
+  Search,
   Settings,
   Sparkles,
   Sun,
@@ -16,6 +17,7 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react";
+import { CommandPalette, useCommandPaletteShortcut } from "@/components/CommandPalette";
 import { useHealth } from "@/lib/api";
 import { useTheme, type Theme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
@@ -37,8 +39,13 @@ const THEMES: { value: Theme; icon: LucideIcon; label: string }[] = [
   { value: "system", icon: Monitor, label: "Tizim" },
 ];
 
+const isMac = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform);
+
 export function AppShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
+  const [palette, setPalette] = useState(false);
+  const togglePalette = useCallback((fn: (o: boolean) => boolean) => setPalette(fn), []);
+  useCommandPaletteShortcut(togglePalette);
 
   return (
     <div className="flex h-full">
@@ -53,6 +60,20 @@ export function AppShell({ children }: { children: ReactNode }) {
           <span className="font-semibold tracking-tight">Dashboard</span>
           <button className="md:hidden" onClick={() => setOpen(false)} aria-label="Menyuni yopish">
             <X className="size-5" />
+          </button>
+        </div>
+        <div className="px-2 pb-2">
+          <button
+            type="button"
+            onClick={() => {
+              setOpen(false);
+              setPalette(true);
+            }}
+            className="flex w-full items-center gap-2 rounded-md border bg-card px-3 py-1.5 text-sm text-muted-foreground hover:bg-accent"
+          >
+            <Search className="size-4" />
+            <span className="flex-1 text-left">Qidirish yoki qo'shish</span>
+            <kbd className="text-[10px]">{isMac ? "⌘K" : "Ctrl K"}</kbd>
           </button>
         </div>
         <nav className="flex-1 space-y-0.5 px-2">
@@ -83,6 +104,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </header>
         <main className="min-h-0 flex-1 overflow-auto">{children}</main>
       </div>
+      <CommandPalette open={palette} onOpenChange={setPalette} />
     </div>
   );
 }

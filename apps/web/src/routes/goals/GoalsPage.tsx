@@ -12,8 +12,8 @@ import {
   type GoalTreeNode,
   type Period,
 } from "@loiha/shared";
-import { Button } from "@/components/ui";
-import { flattenTree, useGoalTree, useTasks } from "@/lib/planning";
+import { Button, Select } from "@/components/ui";
+import { flattenTree, useGoalTree, useTags, useTasks } from "@/lib/planning";
 import { cn } from "@/lib/utils";
 import { GoalCard } from "./GoalCard";
 import { GoalSheet, type SheetTarget } from "./GoalSheet";
@@ -56,6 +56,8 @@ export function GoalsPage({ view, period: key, mode }: { view: GoalView; period?
   const tasks = useTasks(periodKey(period), taskView(view));
   const [sheet, setSheet] = useState<SheetTarget | null>(null);
   const [taskSheet, setTaskSheet] = useState<TaskTarget | null>(null);
+  const tags = useTags();
+  const [tagFilter, setTagFilter] = useState("");
 
   const go = (v: GoalView, p: Period, m: TaskMode = mode) =>
     navigate({ search: { view: v, period: periodKey(p), ...(m !== "royxat" ? { mode: m } : {}) } });
@@ -132,8 +134,23 @@ export function GoalsPage({ view, period: key, mode }: { view: GoalView; period?
         <>
           <TopGoals level={VIEW_LEVEL[view]} period={period} goals={flat} onOpen={open} onCreate={create} />
           <section className="space-y-3">
-            <div className="flex items-center justify-between gap-3">
-              <h2 className="text-sm font-medium text-muted-foreground">Vazifalar</h2>
+            <div className="flex flex-wrap items-center gap-3">
+              <h2 className="mr-auto text-sm font-medium text-muted-foreground">Vazifalar</h2>
+              {(tags.data?.length ?? 0) > 0 && (
+                <Select
+                  aria-label="Teg bo'yicha filtr"
+                  value={tagFilter}
+                  onChange={(e) => setTagFilter(e.target.value)}
+                  className="h-8 w-auto text-xs"
+                >
+                  <option value="">Barcha teglar</option>
+                  {tags.data!.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      #{t.name}
+                    </option>
+                  ))}
+                </Select>
+              )}
               <div className="flex rounded-md bg-muted p-0.5 text-sm" role="tablist" aria-label="Ko'rinish">
                 {TASK_MODES.map((m) => {
                   const Icon = m === "kanban" ? Columns3 : List;
@@ -162,7 +179,8 @@ export function GoalsPage({ view, period: key, mode }: { view: GoalView; period?
               <p className="text-sm text-destructive">Vazifalarni yuklab bo'lmadi: {tasks.error.message}</p>
             ) : (
               (() => {
-                const props = { period, tasks: tasks.data, goals: flat, today, onOpen: setTaskSheet };
+                const shown = tagFilter ? tasks.data.filter((t) => t.tagIds.includes(tagFilter)) : tasks.data;
+                const props = { period, tasks: shown, goals: flat, today, onOpen: setTaskSheet };
                 return (
                   <TaskDnd>
                     {mode === "kanban" ? (

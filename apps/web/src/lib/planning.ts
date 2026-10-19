@@ -2,10 +2,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type {
   CreateGoalInput,
   CreateKeyResultInput,
+  CreateTagInput,
   CreateTaskInput,
   GoalDto,
   GoalTreeNode,
   KeyResultDto,
+  TagDto,
   TaskDto,
   UpdateGoalInput,
   UpdateKeyResultInput,
@@ -23,7 +25,12 @@ const json = (method: string, body?: unknown): RequestInit => ({
 });
 
 export const planningApi = {
-  goalTree: (period: string) => request<GoalTreeNode[]>(`/api/goals/tree?period=${encodeURIComponent(period)}`),
+  /** `period` berilmasa — barcha maqsadlar daraxti (qidiruv palitrasi uchun). */
+  goalTree: (period?: string) =>
+    request<GoalTreeNode[]>(`/api/goals/tree${period ? `?period=${encodeURIComponent(period)}` : ""}`),
+  goals: (params: Record<string, string>) => request<GoalDto[]>(`/api/goals?${new URLSearchParams(params)}`),
+  tags: () => request<TagDto[]>("/api/tags"),
+  createTag: (input: CreateTagInput) => request<TagDto>("/api/tags", json("POST", input)),
   createGoal: (input: CreateGoalInput) => request<GoalDto>("/api/goals", json("POST", input)),
   updateGoal: (id: string, input: UpdateGoalInput) => request<GoalDto>(`/api/goals/${id}`, json("PATCH", input)),
   deleteGoal: (id: string) => request<null>(`/api/goals/${id}`, json("DELETE")),
@@ -39,8 +46,16 @@ export const planningApi = {
   deleteTask: (id: string) => request<null>(`/api/tasks/${id}`, json("DELETE")),
 };
 
-export function useGoalTree(period: string) {
-  return useQuery({ queryKey: ["goals", "tree", period], queryFn: () => planningApi.goalTree(period) });
+export function useGoalTree(period?: string, enabled = true) {
+  return useQuery({
+    queryKey: ["goals", "tree", period ?? "all"],
+    queryFn: () => planningApi.goalTree(period),
+    enabled,
+  });
+}
+
+export function useTags() {
+  return useQuery({ queryKey: ["tags"], queryFn: planningApi.tags, staleTime: 60_000 });
 }
 
 /** Davr bilan kesishadigan vazifalar (Q-043). */
@@ -58,7 +73,11 @@ export function usePlanningMutation<TArgs, TResult>(fn: (args: TArgs) => Promise
   return useMutation({
     mutationFn: fn,
     onSuccess: () =>
-      Promise.all([qc.invalidateQueries({ queryKey: ["goals"] }), qc.invalidateQueries({ queryKey: ["tasks"] })]),
+      Promise.all([
+        qc.invalidateQueries({ queryKey: ["goals"] }),
+        qc.invalidateQueries({ queryKey: ["tasks"] }),
+        qc.invalidateQueries({ queryKey: ["tags"] }),
+      ]),
   });
 }
 
