@@ -1,6 +1,6 @@
 // Avtomatik yaratilgan: node scripts/jarayon-sync.mjs. Qo'lda tahrirlamang.
 window.JARAYON = {
-  "yangilangan": "2026-10-19T06:54:47.096Z",
+  "yangilangan": "2026-10-19T07:06:40.060Z",
   "loyiha": "Lokal AI Dashboard",
   "sprints": [
     {
@@ -185,9 +185,9 @@ window.JARAYON = {
         },
         {
           "id": "S1-07",
-          "title": "Yillik va kvartal ko'rinishi (maqsadlar xaritasi)",
+          "title": "Yillik va kvartal ko'rinishi (maqsadlar xaritasi) — `apps/web/src/routes/goals/` (`GoalsPage`, `GoalCard`, `GoalSheet`, `labels.ts`), `apps/web/src/lib/planning.ts`; `/maqsadlar` (`view=yil|kvartal`, `period`), davr navigatsiyasi, yil: yillik maqsadlar + 4 kvartal ustuni, kvartal: maqsadlar + 3 oy ustuni; o'ng panelda maqsad/KR yaratish, tahrirlash, o'chirish. Tekshirildi: typecheck 7/7, lint 0, format toza; brauzerda alohida test bazasi bilan sinaldi (progress yangilanishi, KR inline tahriri, yaratish/o'chirish, 375px va qorong'i rejim, konsolda xato yo'q). Qarorlar: Q-047…Q-050",
           "group": "UI",
-          "status": "rejalashtirilgan"
+          "status": "bajarildi"
         },
         {
           "id": "S1-08",
@@ -1320,6 +1320,44 @@ window.JARAYON = {
       "kontekst": "Server va MCP bir xil tekshiruvdan o'tishi kerak.",
       "qaror": "`listGoalsQuerySchema`, `listTasksQuerySchema`, `goalTreeQuerySchema` shared'da; servis funksiyalari parse qilingan qiymatni qabul qiladi (S1-12 MCP ham shu sxemalardan o'tkazadi).",
       "oqibat": "Teg va matn bo'yicha qidiruv — S1-11."
+    },
+    {
+      "id": "Q-047",
+      "sarlavha": "Maqsadlar xaritasi bitta daraxt so'rovidan quriladi",
+      "sana": "2026-10-19",
+      "sprint": "S1 (S1-07)",
+      "status": "qabul qilingan",
+      "kontekst": "Yil/kvartal xaritasi joriy davr maqsadlarini va kichik davrlar ustunlarini ko'rsatadi.",
+      "qaror": "`GET /api/goals/tree?period=…` dan bitta so'rov, UI'da tekislanadi: tepada joriy davr maqsadlari, pastda kichik davrlar ustunlari (yil → 4 kvartal, kvartal → 3 oy). Ota maqsad tanlovi uchun yuqori darajali maqsadlar ham shu javobda bor.",
+      "oqibat": "S1-08 shu sahifaga Oy/Hafta tablarini qo'shadi va GoalSheet/GoalCard'ni qayta ishlatadi."
+    },
+    {
+      "id": "Q-048",
+      "sarlavha": "Ko'rinish holati URL search parametrlarida",
+      "sana": "2026-10-19",
+      "sprint": "S1 (S1-07)",
+      "status": "qabul qilingan",
+      "kontekst": "Havola va orqaga tugmasi ishlashi kerak.",
+      "qaror": "`view` (yil|kvartal) va `period` (Q-028 periodKey) URL'da. Darajasi mos kelmagan kalit ko'rinish darajasiga keltiriladi (kvartal + 2026 → joriy yoki 1-kvartal)."
+    },
+    {
+      "id": "Q-049",
+      "sarlavha": "Tahrirlash o'ng panelda (Sheet), Radix Dialog qo'shilmadi",
+      "sana": "2026-10-19",
+      "sprint": "S1 (S1-07)",
+      "status": "qabul qilingan",
+      "kontekst": "Tahrirlashda xarita konteksti yo'qolmasligi kerak.",
+      "qaror": "Alohida sahifa o'rniga o'ng panel; oddiy o'z komponentimiz (Esc/fon bosilsa yopiladi).",
+      "rad etilgan": "Radix Dialog — yangi bog'liqlik kerak emas."
+    },
+    {
+      "id": "Q-050",
+      "sarlavha": "Ota maqsad tanlovi server qoidasini UI'da takrorlaydi",
+      "sana": "2026-10-19",
+      "sprint": "S1 (S1-07)",
+      "status": "qabul qilingan",
+      "kontekst": "Server Q-039 qoidasini tekshiradi; foydalanuvchi noto'g'ri tanlov qilmasligi kerak.",
+      "qaror": "Faqat darajasi yuqori va davri qamragan maqsadlar ko'rsatiladi; davr o'zgarsa mos kelmagan ota tozalanadi."
     }
   ],
   "hisobotlar": [

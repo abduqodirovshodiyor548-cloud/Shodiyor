@@ -10,12 +10,13 @@ export class ApiError extends Error {
   }
 }
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
+export async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(path, {
     ...init,
     headers: { "content-type": "application/json", ...init?.headers },
   });
-  const body = await res.json().catch(() => null);
+  // 204 (DELETE) — tanasiz javob.
+  const body = res.status === 204 ? null : await res.json().catch(() => null);
   if (!res.ok) throw new ApiError(body?.error ?? `HTTP ${res.status}`, res.status);
   return body as T;
 }

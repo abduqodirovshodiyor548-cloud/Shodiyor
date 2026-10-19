@@ -387,3 +387,33 @@ Format (hisobotchi agent va sinxron skript shunga tayanadi):
 - **Kontekst:** Server va MCP bir xil tekshiruvdan o'tishi kerak.
 - **Qaror:** `listGoalsQuerySchema`, `listTasksQuerySchema`, `goalTreeQuerySchema` shared'da; servis funksiyalari parse qilingan qiymatni qabul qiladi (S1-12 MCP ham shu sxemalardan o'tkazadi).
 - **Oqibat:** Teg va matn bo'yicha qidiruv — S1-11.
+
+## Q-047: Maqsadlar xaritasi bitta daraxt so'rovidan quriladi
+- **Sana:** 2026-10-19
+- **Sprint:** S1 (S1-07)
+- **Status:** qabul qilingan
+- **Kontekst:** Yil/kvartal xaritasi joriy davr maqsadlarini va kichik davrlar ustunlarini ko'rsatadi.
+- **Qaror:** `GET /api/goals/tree?period=…` dan bitta so'rov, UI'da tekislanadi: tepada joriy davr maqsadlari, pastda kichik davrlar ustunlari (yil → 4 kvartal, kvartal → 3 oy). Ota maqsad tanlovi uchun yuqori darajali maqsadlar ham shu javobda bor.
+- **Oqibat:** S1-08 shu sahifaga Oy/Hafta tablarini qo'shadi va GoalSheet/GoalCard'ni qayta ishlatadi.
+
+## Q-048: Ko'rinish holati URL search parametrlarida
+- **Sana:** 2026-10-19
+- **Sprint:** S1 (S1-07)
+- **Status:** qabul qilingan
+- **Kontekst:** Havola va orqaga tugmasi ishlashi kerak.
+- **Qaror:** `view` (yil|kvartal) va `period` (Q-028 periodKey) URL'da. Darajasi mos kelmagan kalit ko'rinish darajasiga keltiriladi (kvartal + 2026 → joriy yoki 1-kvartal).
+
+## Q-049: Tahrirlash o'ng panelda (Sheet), Radix Dialog qo'shilmadi
+- **Sana:** 2026-10-19
+- **Sprint:** S1 (S1-07)
+- **Status:** qabul qilingan
+- **Kontekst:** Tahrirlashda xarita konteksti yo'qolmasligi kerak.
+- **Qaror:** Alohida sahifa o'rniga o'ng panel; oddiy o'z komponentimiz (Esc/fon bosilsa yopiladi).
+- **Rad etilgan:** Radix Dialog — yangi bog'liqlik kerak emas.
+
+## Q-050: Ota maqsad tanlovi server qoidasini UI'da takrorlaydi
+- **Sana:** 2026-10-19
+- **Sprint:** S1 (S1-07)
+- **Status:** qabul qilingan
+- **Kontekst:** Server Q-039 qoidasini tekshiradi; foydalanuvchi noto'g'ri tanlov qilmasligi kerak.
+- **Qaror:** Faqat darajasi yuqori va davri qamragan maqsadlar ko'rsatiladi; davr o'zgarsa mos kelmagan ota tozalanadi.

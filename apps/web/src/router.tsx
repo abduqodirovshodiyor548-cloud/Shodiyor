@@ -2,6 +2,7 @@ import { Outlet, createRootRoute, createRoute, createRouter } from "@tanstack/re
 import { AppShell } from "@/components/layout/AppShell";
 import { AiConsolePage } from "@/routes/AiConsole";
 import { HomePage, PlaceholderPage } from "@/routes/Home";
+import { GOAL_VIEWS, GoalsPage, type GoalView } from "@/routes/goals/GoalsPage";
 
 const rootRoute = createRootRoute({
   component: () => (
@@ -24,8 +25,20 @@ const aiRoute = createRoute({
   },
 });
 
+const goalsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/maqsadlar",
+  validateSearch: (s: Record<string, unknown>): { view?: GoalView; period?: string } => ({
+    ...(GOAL_VIEWS.includes(s.view as GoalView) ? { view: s.view as GoalView } : {}),
+    ...(typeof s.period === "string" ? { period: s.period } : {}),
+  }),
+  component: function GoalsRoute() {
+    const { view, period } = goalsRoute.useSearch();
+    return <GoalsPage view={view ?? "yil"} period={period} />;
+  },
+});
+
 const placeholders = [
-  { path: "/maqsadlar", title: "Maqsadlar va vazifalar", sprint: "S1" },
   { path: "/kalendar", title: "Kalendar", sprint: "S2" },
   { path: "/bilim-bazasi", title: "Bilim bazasi", sprint: "S3" },
   { path: "/instrumentlar", title: "Instrumentlar", sprint: "S5–S8" },
@@ -38,7 +51,7 @@ const placeholders = [
   }),
 );
 
-const routeTree = rootRoute.addChildren([homeRoute, aiRoute, ...placeholders]);
+const routeTree = rootRoute.addChildren([homeRoute, aiRoute, goalsRoute, ...placeholders]);
 
 export const router = createRouter({ routeTree });
 
