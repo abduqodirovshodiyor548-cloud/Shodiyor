@@ -32,6 +32,8 @@ export const planningApi = {
     request<KeyResultDto>(`/api/key-results/${id}`, json("PATCH", input)),
   deleteKeyResult: (id: string) => request<null>(`/api/key-results/${id}`, json("DELETE")),
   tasks: (period: string) => request<TaskDto[]>(`/api/tasks?period=${encodeURIComponent(period)}&limit=1000`),
+  /** Ixtiyoriy filtrlar bilan (S1-06: from/to, status, planLevel …). */
+  taskQuery: (params: Record<string, string>) => request<TaskDto[]>(`/api/tasks?${new URLSearchParams(params)}`),
   createTask: (input: CreateTaskInput) => request<TaskDto>("/api/tasks", json("POST", input)),
   updateTask: (id: string, input: UpdateTaskInput) => request<TaskDto>(`/api/tasks/${id}`, json("PATCH", input)),
   deleteTask: (id: string) => request<null>(`/api/tasks/${id}`, json("DELETE")),
@@ -44,6 +46,10 @@ export function useGoalTree(period: string) {
 /** Davr bilan kesishadigan vazifalar (Q-043). */
 export function useTasks(period: string, enabled = true) {
   return useQuery({ queryKey: ["tasks", period], queryFn: () => planningApi.tasks(period), enabled });
+}
+
+export function useTaskQuery(params: Record<string, string>, enabled = true) {
+  return useQuery({ queryKey: ["tasks", "query", params], queryFn: () => planningApi.taskQuery(params), enabled });
 }
 
 /** Yozish amallari; muvaffaqiyatdan keyin maqsad va vazifa so'rovlari yangilanadi. */

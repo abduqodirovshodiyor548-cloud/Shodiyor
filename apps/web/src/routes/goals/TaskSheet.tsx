@@ -53,6 +53,7 @@ interface FormState {
   keyResultId: string;
   estimate: string;
   dueDate: string;
+  focus: boolean;
 }
 
 function initialState(task?: TaskDto, initial?: Extract<TaskTarget, { kind: "create" }>): FormState {
@@ -67,6 +68,7 @@ function initialState(task?: TaskDto, initial?: Extract<TaskTarget, { kind: "cre
     keyResultId: task?.keyResultId ?? "",
     estimate: task?.estimateMinutes ? String(task.estimateMinutes) : "",
     dueDate: task?.dueDate ?? "",
+    focus: task?.focus ?? false,
   };
 }
 
@@ -110,6 +112,7 @@ function TaskForm({
         keyResultId: form.keyResultId || null,
         estimateMinutes: estimate,
         dueDate: form.dueDate || null,
+        focus: form.focus,
       },
       { onSuccess: onDone },
     );
@@ -205,6 +208,16 @@ function TaskForm({
           <Input type="date" value={form.dueDate} onChange={(e) => set("dueDate", e.target.value)} />
         </Field>
       </div>
+
+      <label className="flex items-center gap-2 text-sm">
+        <input
+          type="checkbox"
+          className="size-4 accent-[var(--primary)]"
+          checked={form.focus}
+          onChange={(e) => set("focus", e.target.checked)}
+        />
+        Kunning fokus vazifasi ("Bugun" sahifasida yuqorida)
+      </label>
 
       {save.error && <p className="text-sm text-destructive">{save.error.message}</p>}
       {remove.error && <p className="text-sm text-destructive">{remove.error.message}</p>}

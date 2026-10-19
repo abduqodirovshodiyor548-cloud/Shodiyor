@@ -431,6 +431,7 @@ export function createTask(db: Db, input: CreateTaskInput): TaskDto {
         priority: input.priority,
         dueDate: input.dueDate ?? null,
         estimateMinutes: input.estimateMinutes ?? null,
+        focus: input.focus,
         sortOrder: input.sortOrder,
         completedAt: status === "done" ? new Date() : null,
       })
@@ -456,6 +457,7 @@ export function updateTask(db: Db, id: string, input: UpdateTaskInput): TaskDto 
         priority: input.priority,
         dueDate: input.dueDate,
         estimateMinutes: input.estimateMinutes,
+        focus: input.focus,
         sortOrder: input.sortOrder,
         completedAt: input.status ? completedAtFor(input.status === "done", task) : undefined,
         // Faqat teglar o'zgarsa ham `set` bo'sh qolmasin.

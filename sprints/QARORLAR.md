@@ -448,3 +448,34 @@ Format (hisobotchi agent va sinxron skript shunga tayanadi):
 - **Kontekst:** Q-048 davomi: oy/hafta tablari va kanban/ro'yxat rejimi.
 - **Qaror:** `view` (yil|kvartal|oy|hafta), `period`, `mode` URL'da; standart mode — ro'yxat (URL'da yozilmaydi).
 - **Oqibat:** S1-09 TaskRow/Section/QuickAdd'ni qayta ishlatadi.
+
+## Q-055: Fokus — vazifadagi `focus` boolean ustuni
+- **Sana:** 2026-10-19
+- **Sprint:** S1 (S1-09)
+- **Status:** qabul qilingan
+- **Kontekst:** "Bugun" sahifasida kunning asosiy vazifalarini ajratish kerak edi.
+- **Qaror:** `tasks.focus` (boolean, default false; migratsiya `0003_s1_task_focus.sql`). Fokus vazifa bilan birga ko'chadi (ertaga surilsa ham saqlanadi), API/MCP'da oddiy maydon, so'rovlar sodda.
+- **Rad etilgan:** settings'dagi `focus:YYYY-MM-DD` ro'yxati (vazifa o'chsa/ko'chsa sinxron saqlash kerak bo'lardi); ustuvorlik (priority=3) bilan almashtirish (ustuvorlik uzoq muddatli, fokus — kunlik tanlov).
+- **Oqibat:** S1-12 MCP `update_task` `focus` maydonini ham qabul qiladi.
+
+## Q-056: Fokus limiti 3 — tavsiya, taqiq emas
+- **Sana:** 2026-10-19
+- **Sprint:** S1 (S1-09)
+- **Status:** qabul qilingan
+- **Qaror:** 3 dan ko'p fokus vazifa qo'shish mumkin; bo'lim sarlavhasida ogohlantirish chiqadi.
+
+## Q-057: "Bugun" alohida route (`/bugun`)
+- **Sana:** 2026-10-19
+- **Sprint:** S1 (S1-09)
+- **Status:** qabul qilingan
+- **Kontekst:** Q-048/Q-054 — /maqsadlar ichidagi tablar.
+- **Qaror:** `/bugun?date=YYYY-MM-DD` (standart bugun), chap menyuda "Bugun" bandi. Kundalik eng ko'p ochiladigan sahifa — menyudan bir bosishda; kun navigatsiyasi va kechikkanlar kabi kunga xos bloklar bor.
+- **Rad etilgan:** /maqsadlar ichida 5-tab.
+- **Oqibat:** S1-10 drag-and-drop shu sahifada ham qo'llanishi mumkin (hafta vazifasini kunga sudrash).
+
+## Q-058: "Muddati o'tgan" ta'rifi
+- **Sana:** 2026-10-19
+- **Sprint:** S1 (S1-09)
+- **Status:** qabul qilingan
+- **Kontekst:** Q-023 (kun belgilanmagan vazifalar), Q-052.
+- **Qaror:** Muddati o'tgan = rejasi kunlik, sanasi bugundan oldin, holati todo/in_progress (`GET /api/tasks?to=kecha&planLevel=day&status=todo,in_progress`); faqat bugun ko'rilganda ko'rsatiladi. Hafta/oy darajasidagi vazifalar kechikkan hisoblanmaydi — o'ng ustunda "kunga olish" uchun ko'rsatiladi.

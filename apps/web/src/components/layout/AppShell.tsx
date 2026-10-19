@@ -2,6 +2,7 @@ import { useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   BookOpen,
+  CalendarCheck,
   CalendarDays,
   Home,
   Menu,
@@ -21,6 +22,7 @@ import { cn } from "@/lib/utils";
 
 export const NAV: { to: string; label: string; icon: LucideIcon; sprint?: string }[] = [
   { to: "/", label: "Bosh sahifa", icon: Home },
+  { to: "/bugun", label: "Bugun", icon: CalendarCheck },
   { to: "/ai", label: "AI konsol", icon: Sparkles },
   { to: "/maqsadlar", label: "Maqsadlar", icon: Target, sprint: "S1" },
   { to: "/kalendar", label: "Kalendar", icon: CalendarDays, sprint: "S2" },

@@ -85,6 +85,8 @@ export const createTaskSchema = z.object({
   plan: taskPlanSchema.nullish(),
   dueDate: isoDate.nullish(),
   estimateMinutes: estimateMinutes.nullish(),
+  /** Kunning fokus vazifasi ("Bugun" sahifasi). */
+  focus: z.boolean().optional(),
   sortOrder: sortOrder.optional(),
   /** To'liq teglar to'plami (yangilashda almashtiriladi). */
   tagIds: z.array(id).max(50).optional(),
@@ -269,6 +271,7 @@ export interface TaskDto {
   estimateMinutes: number | null;
   recurrenceId: string | null;
   occurrenceDate: string | null;
+  focus: boolean;
   sortOrder: number;
   tagIds: string[];
   createdAt: number;

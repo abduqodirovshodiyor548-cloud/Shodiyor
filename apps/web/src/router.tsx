@@ -2,6 +2,8 @@ import { Outlet, createRootRoute, createRoute, createRouter } from "@tanstack/re
 import { AppShell } from "@/components/layout/AppShell";
 import { AiConsolePage } from "@/routes/AiConsole";
 import { HomePage, PlaceholderPage } from "@/routes/Home";
+import { TodayPage } from "@/routes/today/TodayPage";
+import { isIsoDate } from "@loiha/shared";
 import { GOAL_VIEWS, GoalsPage, TASK_MODES, type GoalView } from "@/routes/goals/GoalsPage";
 import type { TaskMode } from "@/routes/goals/TaskViews";
 
@@ -23,6 +25,17 @@ const aiRoute = createRoute({
   component: function AiRoute() {
     const { job } = aiRoute.useSearch();
     return <AiConsolePage jobId={job ?? null} />;
+  },
+});
+
+const todayRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/bugun",
+  validateSearch: (s: Record<string, unknown>): { date?: string } =>
+    typeof s.date === "string" && isIsoDate(s.date) ? { date: s.date } : {},
+  component: function TodayRoute() {
+    const { date } = todayRoute.useSearch();
+    return <TodayPage date={date} />;
   },
 });
 
@@ -53,7 +66,7 @@ const placeholders = [
   }),
 );
 
-const routeTree = rootRoute.addChildren([homeRoute, aiRoute, goalsRoute, ...placeholders]);
+const routeTree = rootRoute.addChildren([homeRoute, aiRoute, todayRoute, goalsRoute, ...placeholders]);
 
 export const router = createRouter({ routeTree });
 

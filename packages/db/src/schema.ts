@@ -191,6 +191,8 @@ export const tasks = sqliteTable(
     planStart: isoDate("plan_start"),
     dueDate: isoDate("due_date"),
     estimateMinutes: integer("estimate_minutes"),
+    /** Kunning fokus vazifasi (S1-09, "Bugun" sahifasi). */
+    focus: integer("focus", { mode: "boolean" }).notNull().default(false),
     /** Takrorlanuvchi seriya (S1-04); seriya o'chirilsa vazifa oddiy vazifa bo'lib qoladi. */
     recurrenceId: text("recurrence_id").references(() => taskRecurrences.id, { onDelete: "set null" }),
     /** Seriyadagi takrorlanish sanasi; vazifa boshqa kunga ko'chirilsa ham o'zgarmaydi. */

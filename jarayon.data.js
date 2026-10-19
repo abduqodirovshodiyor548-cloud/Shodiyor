@@ -1,6 +1,6 @@
 // Avtomatik yaratilgan: node scripts/jarayon-sync.mjs. Qo'lda tahrirlamang.
 window.JARAYON = {
-  "yangilangan": "2026-10-19T07:55:51.402Z",
+  "yangilangan": "2026-10-19T09:14:06.331Z",
   "loyiha": "Lokal AI Dashboard",
   "sprints": [
     {
@@ -197,9 +197,9 @@ window.JARAYON = {
         },
         {
           "id": "S1-09",
-          "title": "Kunlik ko'rinish: \"Bugun\" sahifasi, fokus ro'yxati",
+          "title": "Kunlik ko'rinish: \"Bugun\" sahifasi, fokus ro'yxati — `/bugun` (`routes/today/TodayPage.tsx`): kun navigatsiyasi, 3 xulosa kartasi, Fokus / Boshqa vazifalar / Muddati o'tgan bo'limlari, o'ngda hafta maqsadlari va kunga olinadigan vazifalar; `tasks.focus` ustuni (migratsiya 0003), TaskSheet da fokus belgisi. Tekshirildi: typecheck 7/7, lint 0, shared 37/37, db 36/36, brauzerda (mobil 375px, qorong'i rejim). Qarorlar: Q-055…Q-058",
           "group": "UI",
-          "status": "rejalashtirilgan"
+          "status": "bajarildi"
         },
         {
           "id": "S1-10",
@@ -1397,6 +1397,45 @@ window.JARAYON = {
       "kontekst": "Q-048 davomi: oy/hafta tablari va kanban/ro'yxat rejimi.",
       "qaror": "`view` (yil|kvartal|oy|hafta), `period`, `mode` URL'da; standart mode — ro'yxat (URL'da yozilmaydi).",
       "oqibat": "S1-09 TaskRow/Section/QuickAdd'ni qayta ishlatadi."
+    },
+    {
+      "id": "Q-055",
+      "sarlavha": "Fokus — vazifadagi `focus` boolean ustuni",
+      "sana": "2026-10-19",
+      "sprint": "S1 (S1-09)",
+      "status": "qabul qilingan",
+      "kontekst": "\"Bugun\" sahifasida kunning asosiy vazifalarini ajratish kerak edi.",
+      "qaror": "`tasks.focus` (boolean, default false; migratsiya `0003_s1_task_focus.sql`). Fokus vazifa bilan birga ko'chadi (ertaga surilsa ham saqlanadi), API/MCP'da oddiy maydon, so'rovlar sodda.",
+      "rad etilgan": "settings'dagi `focus:YYYY-MM-DD` ro'yxati (vazifa o'chsa/ko'chsa sinxron saqlash kerak bo'lardi); ustuvorlik (priority=3) bilan almashtirish (ustuvorlik uzoq muddatli, fokus — kunlik tanlov).",
+      "oqibat": "S1-12 MCP `update_task` `focus` maydonini ham qabul qiladi."
+    },
+    {
+      "id": "Q-056",
+      "sarlavha": "Fokus limiti 3 — tavsiya, taqiq emas",
+      "sana": "2026-10-19",
+      "sprint": "S1 (S1-09)",
+      "status": "qabul qilingan",
+      "qaror": "3 dan ko'p fokus vazifa qo'shish mumkin; bo'lim sarlavhasida ogohlantirish chiqadi."
+    },
+    {
+      "id": "Q-057",
+      "sarlavha": "\"Bugun\" alohida route (`/bugun`)",
+      "sana": "2026-10-19",
+      "sprint": "S1 (S1-09)",
+      "status": "qabul qilingan",
+      "kontekst": "Q-048/Q-054 — /maqsadlar ichidagi tablar.",
+      "qaror": "`/bugun?date=YYYY-MM-DD` (standart bugun), chap menyuda \"Bugun\" bandi. Kundalik eng ko'p ochiladigan sahifa — menyudan bir bosishda; kun navigatsiyasi va kechikkanlar kabi kunga xos bloklar bor.",
+      "rad etilgan": "/maqsadlar ichida 5-tab.",
+      "oqibat": "S1-10 drag-and-drop shu sahifada ham qo'llanishi mumkin (hafta vazifasini kunga sudrash)."
+    },
+    {
+      "id": "Q-058",
+      "sarlavha": "\"Muddati o'tgan\" ta'rifi",
+      "sana": "2026-10-19",
+      "sprint": "S1 (S1-09)",
+      "status": "qabul qilingan",
+      "kontekst": "Q-023 (kun belgilanmagan vazifalar), Q-052.",
+      "qaror": "Muddati o'tgan = rejasi kunlik, sanasi bugundan oldin, holati todo/in_progress (`GET /api/tasks?to=kecha&planLevel=day&status=todo,in_progress`); faqat bugun ko'rilganda ko'rsatiladi. Hafta/oy darajasidagi vazifalar kechikkan hisoblanmaydi — o'ng ustunda \"kunga olish\" uchun ko'rsatiladi."
     }
   ],
   "hisobotlar": [

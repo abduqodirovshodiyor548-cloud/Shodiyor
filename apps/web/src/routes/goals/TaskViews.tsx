@@ -5,6 +5,7 @@ import {
   addDays,
   periodOf,
   periodsWithin,
+  type CreateTaskInput,
   type GoalTreeNode,
   type Period,
   type TaskDto,
@@ -31,7 +32,7 @@ interface ViewProps {
 }
 
 const STATUS_ORDER: Record<TaskStatus, number> = { in_progress: 0, todo: 1, done: 2, cancelled: 3 };
-const byStatusPriority = (a: TaskDto, b: TaskDto) =>
+export const byStatusPriority = (a: TaskDto, b: TaskDto) =>
   STATUS_ORDER[a.status] - STATUS_ORDER[b.status] ||
   b.priority - a.priority ||
   a.sortOrder - b.sortOrder ||
@@ -108,16 +109,21 @@ function DoneCheckbox({ task }: { task: TaskDto }) {
   );
 }
 
+/** Qator oxiridagi qo'shimcha amal (masalan "Bugun" sahifasidagi fokus yulduzchasi yoki "Bugunga olish"). */
+export type RowAction = (task: TaskDto) => ReactNode;
+
 function TaskRow({
   task,
   goals,
   showPlan,
   onOpen,
+  action,
 }: {
   task: TaskDto;
   goals: GoalTreeNode[];
   showPlan: boolean;
   onOpen: ViewProps["onOpen"];
+  action?: RowAction;
 }) {
   return (
     <li
@@ -135,18 +141,32 @@ function TaskRow({
         <TaskMeta task={task} goals={goals} showPlan={showPlan} />
       </div>
       <PriorityDot priority={task.priority} />
+      {action && (
+        <div className="-my-1 shrink-0" onClick={(e) => e.stopPropagation()}>
+          {action(task)}
+        </div>
+      )}
     </li>
   );
 }
 
 /** Tezkor qo'shish: Enter bilan berilgan rejada vazifa yaratadi. */
-function QuickAdd({ plan, placeholder }: { plan: TaskPlanInput; placeholder: string }) {
+function QuickAdd({
+  plan,
+  placeholder,
+  extra,
+}: {
+  plan: TaskPlanInput;
+  placeholder: string;
+  /** Yaratiladigan vazifaning qo'shimcha maydonlari (masalan `focus: true`). */
+  extra?: Omit<CreateTaskInput, "title" | "plan">;
+}) {
   const [title, setTitle] = useState("");
   const create = usePlanningMutation(planningApi.createTask);
   const submit = (e: FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
-    create.mutate({ title, plan }, { onSuccess: () => setTitle("") });
+    create.mutate({ ...extra, title, plan }, { onSuccess: () => setTitle("") });
   };
   return (
     <form onSubmit={submit} className="flex items-center gap-2 px-3 py-1.5">
@@ -164,7 +184,7 @@ function QuickAdd({ plan, placeholder }: { plan: TaskPlanInput; placeholder: str
   );
 }
 
-function Section({
+export function Section({
   title,
   sub,
   highlight,
@@ -173,20 +193,27 @@ function Section({
   showPlan,
   onOpen,
   add,
+  action,
+  empty,
+  className,
 }: {
-  title: string;
+  title: ReactNode;
   sub?: string;
   highlight?: boolean;
   tasks: TaskDto[];
   goals: GoalTreeNode[];
   showPlan: boolean;
   onOpen: ViewProps["onOpen"];
-  add?: { plan: TaskPlanInput; placeholder: string };
+  add?: { plan: TaskPlanInput; placeholder: string; extra?: Omit<CreateTaskInput, "title" | "plan"> };
+  action?: RowAction;
+  /** Vazifa bo'lmasa ko'rsatiladigan matn. */
+  empty?: string;
+  className?: string;
 }) {
   const done = tasks.filter((t) => t.status === "done").length;
   const open = tasks.filter((t) => t.status !== "cancelled").length;
   return (
-    <section className={cn("overflow-hidden rounded-xl border bg-card", highlight && "border-primary/50")}>
+    <section className={cn("overflow-hidden rounded-xl border bg-card", highlight && "border-primary/50", className)}>
       <header className={cn("flex items-baseline gap-2 border-b px-3 py-2", highlight && "bg-primary/5")}>
         <h3 className={cn("text-sm font-medium", highlight && "text-primary")}>{title}</h3>
         {sub && <span className="text-xs text-muted-foreground">{sub}</span>}
@@ -199,10 +226,11 @@ function Section({
       {tasks.length > 0 && (
         <ul className="divide-y">
           {tasks.map((t) => (
-            <TaskRow key={t.id} task={t} goals={goals} showPlan={showPlan} onOpen={onOpen} />
+            <TaskRow key={t.id} task={t} goals={goals} showPlan={showPlan} onOpen={onOpen} action={action} />
           ))}
         </ul>
       )}
+      {tasks.length === 0 && empty && <p className="px-3 py-3 text-sm text-muted-foreground">{empty}</p>}
       {add && <QuickAdd {...add} />}
     </section>
   );

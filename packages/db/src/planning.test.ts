@@ -192,3 +192,12 @@ describe("takrorlanuvchi seriyalar", () => {
     rejects(() => updateRecurrence(db, r.id, { endDate: addDays(today, -1) }), "invalid");
   });
 });
+
+describe("fokus (S1-09)", () => {
+  it("standart false, yaratish va yangilashda o'rnatiladi", () => {
+    const t = createTask(db, { title: "t", plan: { level: "day", date: "2026-10-20" } });
+    assert.equal(t.focus, false);
+    assert.equal(updateTask(db, t.id, { focus: true }).focus, true);
+    assert.equal(createTask(db, { title: "f", focus: true }).focus, true);
+  });
+});
