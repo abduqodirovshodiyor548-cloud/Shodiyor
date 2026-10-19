@@ -38,3 +38,4 @@ export function getDb(): Db {
   return shared;
 }
 export * from "./progress.ts";
+export * from "./recurrence.ts";

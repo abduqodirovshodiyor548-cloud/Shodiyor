@@ -1,6 +1,6 @@
 // Avtomatik yaratilgan: node scripts/jarayon-sync.mjs. Qo'lda tahrirlamang.
 window.JARAYON = {
-  "yangilangan": "2026-10-17T13:37:29.430Z",
+  "yangilangan": "2026-10-19T06:20:36.880Z",
   "loyiha": "Lokal AI Dashboard",
   "sprints": [
     {
@@ -167,9 +167,9 @@ window.JARAYON = {
         },
         {
           "id": "S1-04",
-          "title": "Takrorlanuvchi vazifalar (kunlik, haftalik, maxsus qoida)",
+          "title": "Takrorlanuvchi vazifalar (kunlik, haftalik, maxsus qoida) — `packages/shared/src/recurrence.ts` (recurrenceRuleSchema/recurrenceSchema, occursOn, occurrencesBetween, describeRecurrence), `packages/db/src/recurrence.ts` (materializeRecurrences, resetFutureOccurrences), yangi `task_recurrences` jadvali, `tasks.recurrence_id` + `occurrence_date`, migratsiya `0002_s1_task_recurrences.sql` (ON DELETE set null qo'lda qo'shildi), server ishga tushganda va har soat generatsiya. Tekshirildi: shared 37/37, db 11/11 sinov; typecheck 7/7; lint 0 xato; format toza. Server real ishga tushirib sinalmagan. Eslatma: S1-05 seriya yaratish/o'zgartirishda `resetFutureOccurrences` + `materializeRecurrences` ni chaqirishi shart; S1-12 da `describeRecurrence` ishlatilishi mumkin. Qarorlar: Q-033…Q-036",
           "group": "Ma'lumot modeli",
-          "status": "rejalashtirilgan"
+          "status": "bajarildi"
         },
         {
           "id": "S1-05",
@@ -1180,6 +1180,49 @@ window.JARAYON = {
       "kontekst": "Formula DB'siz sinalishi va UI/serverda qayta ishlatilishi kerak (Q-027 bilan bir xil yondashuv).",
       "qaror": "taskCompletion, keyResultProgress, goalProgress, clamp01 — `@loiha/shared`; kesh yozish — `@loiha/db`. Shu sababli `@loiha/db` ga `@loiha/shared` workspace dependency qo'shildi, db paketiga `test` skripti qo'shildi.",
       "oqibat": "pnpm-lock.yaml yangilandi."
+    },
+    {
+      "id": "Q-033",
+      "sarlavha": "Takrorlanuvchi vazifalar alohida jadvalda, takrorlanishlar oldindan yaratiladi",
+      "sana": "2026-10-19",
+      "sprint": "S1 (S1-04)",
+      "status": "qabul qilingan",
+      "kontekst": "Takrorlanuvchi vazifalar kunlik/haftalik ko'rinish, drag-and-drop, progress va MCP bilan maxsus holatsiz ishlashi kerak.",
+      "qaror": "Seriya alohida `task_recurrences` jadvalida; har takrorlanish `tasks` da oddiy kunlik vazifa (materializatsiya), `tasks.recurrence_id` (FK SET NULL) + `occurrence_date`, yagona indeks (recurrence_id, occurrence_date). Seriyaning o'zi progressga kirmaydi (S1-03 buzilmaydi).",
+      "rad etilgan": "tasks jadvalida shablon-vazifa (progressni buzardi); virtual (so'rovda hisoblanadigan) takrorlanishlar (status va ko'chirishni saqlab bo'lmaydi).",
+      "oqibat": "Migratsiya `0002_s1_task_recurrences.sql`: drizzle-kit ALTER TABLE'da `ON DELETE set null` ni tushirib qoldirgani uchun qo'lda qo'shildi."
+    },
+    {
+      "id": "Q-034",
+      "sarlavha": "Takrorlanish qoidasi — o'zimizning JSON, RRULE emas",
+      "sana": "2026-10-19",
+      "sprint": "S1 (S1-04)",
+      "status": "qabul qilingan",
+      "kontekst": "Qoida formatini tanlash kerak edi.",
+      "qaror": "JSON: daily/weekly/monthly + interval, weekdays 1…7, monthDays 1…31 va -1 (oxirgi kun), zod bilan tekshiriladi. Oyda bo'lmagan kun (31) o'tkazib yuboriladi (RFC 5545 xatti-harakati). Haftalik interval `start` haftasining dushanbasidan sanaladi. Sabab: kichik, UI'da qurish oson. Kutubxonasiz (Q-027 yondashuvi).",
+      "rad etilgan": "rrule kutubxonasi / RFC 5545 RRULE.",
+      "oqibat": "Kerak bo'lsa S2 da Google Calendar uchun RRULE'ga o'giriladi."
+    },
+    {
+      "id": "Q-035",
+      "sarlavha": "Generatsiya gorizonti 14 kun, generated_until bilan",
+      "sana": "2026-10-19",
+      "sprint": "S1 (S1-04)",
+      "status": "qabul qilingan",
+      "kontekst": "Qancha oldinga yaratish va o'zgarish/o'chirishda nima bo'lishi aniqlanishi kerak edi.",
+      "qaror": "Standart gorizont — bugundan 14 kun (`RECURRENCE_HORIZON_DAYS`), `generated_until` bilan idempotent. O'chirilgan takrorlanish qayta yaratilmaydi; seriya o'chirilsa vazifalar oddiy vazifa bo'lib qoladi (SET NULL). Qoida o'zgarganda `resetFutureOccurrences` faqat kelajakdagi `todo` larni o'chirib, generated_until ni orqaga suradi; bajarilgan/boshlanganlari tarix sifatida qoladi. Yaratgandan keyin `recomputeForTask` chaqiriladi (Q-031).",
+      "oqibat": "S1-05 (CRUD) seriyani yaratish/o'zgartirishda `resetFutureOccurrences` + `materializeRecurrences` ni chaqirishi SHART."
+    },
+    {
+      "id": "Q-036",
+      "sarlavha": "Generatsiya server jarayonida, alohida cron/job emas",
+      "sana": "2026-10-19",
+      "sprint": "S1 (S1-04)",
+      "status": "qabul qilingan",
+      "kontekst": "Materializatsiya qachon ishlashi kerak.",
+      "qaror": "`apps/server/src/index.ts` da ishga tushganda va har soatda `materializeRecurrences` chaqiriladi. Lokal bitta foydalanuvchi uchun yetarli.",
+      "rad etilgan": "alohida cron / job navbati.",
+      "oqibat": "Server real ishga tushirib sinalmagan (faqat sinovlar va typecheck)."
     }
   ],
   "hisobotlar": [

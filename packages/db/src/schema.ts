@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import type { RecurrenceRule } from "@loiha/shared";
 import { sql } from "drizzle-orm";
 import {
   check,
@@ -152,6 +153,36 @@ export const keyResults = sqliteTable(
 );
 
 /**
+ * Takrorlanuvchi vazifa seriyalari (S1-04). Seriya o'zi vazifa emas — progressga kirmaydi;
+ * har bir takrorlanish `tasks` da alohida kunlik vazifa sifatida yaratiladi (`recurrence_id` + `occurrence_date`).
+ * `generated_until` — shu sanagacha (kiradi) vazifalar yaratilgan; o'chirilgan takrorlanish qayta yaratilmaydi.
+ */
+export const taskRecurrences = sqliteTable(
+  "task_recurrences",
+  {
+    id: uuid("id").primaryKey(),
+    goalId: text("goal_id").references(() => goals.id, { onDelete: "set null" }),
+    keyResultId: text("key_result_id").references(() => keyResults.id, { onDelete: "set null" }),
+    title: text("title").notNull(),
+    notes: text("notes"),
+    priority: integer("priority").notNull().default(0),
+    estimateMinutes: integer("estimate_minutes"),
+    rule: text("rule", { mode: "json" }).$type<RecurrenceRule>().notNull(),
+    startDate: isoDate("start_date").notNull(),
+    endDate: isoDate("end_date"),
+    active: integer("active", { mode: "boolean" }).notNull().default(true),
+    generatedUntil: isoDate("generated_until"),
+    createdAt: timestamp("created_at").notNull().default(now),
+    updatedAt: updatedAt(),
+  },
+  (t) => [
+    index("task_recurrences_active_idx").on(t.active),
+    check("task_recurrences_priority_check", sql`${t.priority} BETWEEN 0 AND 3`),
+    check("task_recurrences_dates_check", sql`${t.endDate} IS NULL OR ${t.startDate} <= ${t.endDate}`),
+  ],
+);
+
+/**
  * Vazifalar. Maqsad yoki key result'ga bog'lanishi ixtiyoriy (inbox vazifalari).
  * Rejalashtirish: `plan_level` + `plan_start` (kun — o'sha sana, hafta — dushanba, oy — 1-kun); ikkalasi ham bo'sh — rejalashtirilmagan.
  * `priority`: 0 — yo'q, 1 — past, 2 — o'rta, 3 — yuqori.
@@ -170,6 +201,10 @@ export const tasks = sqliteTable(
     planStart: isoDate("plan_start"),
     dueDate: isoDate("due_date"),
     estimateMinutes: integer("estimate_minutes"),
+    /** Takrorlanuvchi seriya (S1-04); seriya o'chirilsa vazifa oddiy vazifa bo'lib qoladi. */
+    recurrenceId: text("recurrence_id").references(() => taskRecurrences.id, { onDelete: "set null" }),
+    /** Seriyadagi takrorlanish sanasi; vazifa boshqa kunga ko'chirilsa ham o'zgarmaydi. */
+    occurrenceDate: isoDate("occurrence_date"),
     sortOrder: integer("sort_order").notNull().default(0),
     createdAt: timestamp("created_at").notNull().default(now),
     updatedAt: updatedAt(),
@@ -177,6 +212,7 @@ export const tasks = sqliteTable(
   },
   (t) => [
     index("tasks_plan_idx").on(t.planLevel, t.planStart),
+    uniqueIndex("tasks_recurrence_occurrence_idx").on(t.recurrenceId, t.occurrenceDate),
     index("tasks_goal_idx").on(t.goalId),
     index("tasks_key_result_idx").on(t.keyResultId),
     index("tasks_status_idx").on(t.status),
@@ -218,3 +254,5 @@ export type Task = typeof tasks.$inferSelect;
 export type NewTask = typeof tasks.$inferInsert;
 export type Tag = typeof tags.$inferSelect;
 export type NewTag = typeof tags.$inferInsert;
+export type TaskRecurrence = typeof taskRecurrences.$inferSelect;
+export type NewTaskRecurrence = typeof taskRecurrences.$inferInsert;

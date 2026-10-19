@@ -275,3 +275,38 @@ Format (hisobotchi agent va sinxron skript shunga tayanadi):
 - **Kontekst:** Formula DB'siz sinalishi va UI/serverda qayta ishlatilishi kerak (Q-027 bilan bir xil yondashuv).
 - **Qaror:** taskCompletion, keyResultProgress, goalProgress, clamp01 — `@loiha/shared`; kesh yozish — `@loiha/db`. Shu sababli `@loiha/db` ga `@loiha/shared` workspace dependency qo'shildi, db paketiga `test` skripti qo'shildi.
 - **Oqibat:** pnpm-lock.yaml yangilandi.
+
+## Q-033: Takrorlanuvchi vazifalar alohida jadvalda, takrorlanishlar oldindan yaratiladi
+- **Sana:** 2026-10-19
+- **Sprint:** S1 (S1-04)
+- **Status:** qabul qilingan
+- **Kontekst:** Takrorlanuvchi vazifalar kunlik/haftalik ko'rinish, drag-and-drop, progress va MCP bilan maxsus holatsiz ishlashi kerak.
+- **Qaror:** Seriya alohida `task_recurrences` jadvalida; har takrorlanish `tasks` da oddiy kunlik vazifa (materializatsiya), `tasks.recurrence_id` (FK SET NULL) + `occurrence_date`, yagona indeks (recurrence_id, occurrence_date). Seriyaning o'zi progressga kirmaydi (S1-03 buzilmaydi).
+- **Rad etilgan:** tasks jadvalida shablon-vazifa (progressni buzardi); virtual (so'rovda hisoblanadigan) takrorlanishlar (status va ko'chirishni saqlab bo'lmaydi).
+- **Oqibat:** Migratsiya `0002_s1_task_recurrences.sql`: drizzle-kit ALTER TABLE'da `ON DELETE set null` ni tushirib qoldirgani uchun qo'lda qo'shildi.
+
+## Q-034: Takrorlanish qoidasi — o'zimizning JSON, RRULE emas
+- **Sana:** 2026-10-19
+- **Sprint:** S1 (S1-04)
+- **Status:** qabul qilingan
+- **Kontekst:** Qoida formatini tanlash kerak edi.
+- **Qaror:** JSON: daily/weekly/monthly + interval, weekdays 1…7, monthDays 1…31 va -1 (oxirgi kun), zod bilan tekshiriladi. Oyda bo'lmagan kun (31) o'tkazib yuboriladi (RFC 5545 xatti-harakati). Haftalik interval `start` haftasining dushanbasidan sanaladi. Sabab: kichik, UI'da qurish oson. Kutubxonasiz (Q-027 yondashuvi).
+- **Rad etilgan:** rrule kutubxonasi / RFC 5545 RRULE.
+- **Oqibat:** Kerak bo'lsa S2 da Google Calendar uchun RRULE'ga o'giriladi.
+
+## Q-035: Generatsiya gorizonti 14 kun, generated_until bilan
+- **Sana:** 2026-10-19
+- **Sprint:** S1 (S1-04)
+- **Status:** qabul qilingan
+- **Kontekst:** Qancha oldinga yaratish va o'zgarish/o'chirishda nima bo'lishi aniqlanishi kerak edi.
+- **Qaror:** Standart gorizont — bugundan 14 kun (`RECURRENCE_HORIZON_DAYS`), `generated_until` bilan idempotent. O'chirilgan takrorlanish qayta yaratilmaydi; seriya o'chirilsa vazifalar oddiy vazifa bo'lib qoladi (SET NULL). Qoida o'zgarganda `resetFutureOccurrences` faqat kelajakdagi `todo` larni o'chirib, generated_until ni orqaga suradi; bajarilgan/boshlanganlari tarix sifatida qoladi. Yaratgandan keyin `recomputeForTask` chaqiriladi (Q-031).
+- **Oqibat:** S1-05 (CRUD) seriyani yaratish/o'zgartirishda `resetFutureOccurrences` + `materializeRecurrences` ni chaqirishi SHART.
+
+## Q-036: Generatsiya server jarayonida, alohida cron/job emas
+- **Sana:** 2026-10-19
+- **Sprint:** S1 (S1-04)
+- **Status:** qabul qilingan
+- **Kontekst:** Materializatsiya qachon ishlashi kerak.
+- **Qaror:** `apps/server/src/index.ts` da ishga tushganda va har soatda `materializeRecurrences` chaqiriladi. Lokal bitta foydalanuvchi uchun yetarli.
+- **Rad etilgan:** alohida cron / job navbati.
+- **Oqibat:** Server real ishga tushirib sinalmagan (faqat sinovlar va typecheck).

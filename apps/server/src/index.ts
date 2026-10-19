@@ -1,6 +1,6 @@
 import { serve } from "@hono/node-server";
 import { config } from "@loiha/config";
-import { getDb } from "@loiha/db";
+import { getDb, materializeRecurrences } from "@loiha/db";
 import { createApp } from "./app.ts";
 import { claudeJob } from "./jobs/claude.ts";
 import { echoJob } from "./jobs/echo.ts";
@@ -14,6 +14,18 @@ const queue = new JobQueue(
   { concurrency: config.claude.maxConcurrency, timeoutMs: config.claude.timeoutMs },
 );
 queue.start();
+
+// Takrorlanuvchi vazifalar (S1-04): ishga tushganda va har soatda oldinga yaratiladi.
+const syncRecurrences = () => {
+  try {
+    const created = materializeRecurrences(db);
+    if (created > 0) console.log(`Takrorlanuvchi vazifalar: ${created} ta yaratildi`);
+  } catch (err) {
+    console.error("Takrorlanuvchi vazifalarni yaratishda xato:", err);
+  }
+};
+syncRecurrences();
+const recurrenceTimer = setInterval(syncRecurrences, 60 * 60 * 1000);
 void detectClaude();
 
 const app = createApp({ db, queue, claude: getClaudeInfo });
@@ -26,6 +38,7 @@ async function shutdown(signal: string) {
   if (shuttingDown) return;
   shuttingDown = true;
   console.log(`${signal}: to'xtatilmoqda…`);
+  clearInterval(recurrenceTimer);
   await queue.stop();
   server.close();
   db.$client.close();
