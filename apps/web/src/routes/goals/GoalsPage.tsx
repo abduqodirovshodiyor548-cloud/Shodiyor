@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { ChevronLeft, ChevronRight, Loader2, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, Columns3, List, Loader2, Plus } from "lucide-react";
 import {
   parsePeriodKey,
   periodKey,
@@ -13,17 +13,27 @@ import {
   type Period,
 } from "@loiha/shared";
 import { Button } from "@/components/ui";
-import { flattenTree, useGoalTree } from "@/lib/planning";
+import { flattenTree, useGoalTree, useTasks } from "@/lib/planning";
 import { cn } from "@/lib/utils";
 import { GoalCard } from "./GoalCard";
 import { GoalSheet, type SheetTarget } from "./GoalSheet";
 import { LEVEL_LABEL, isCurrent, periodTitle, quarterMonths } from "./labels";
+import { TaskSheet, type TaskTarget } from "./TaskSheet";
+import { MonthList, TaskBoard, WeekList, type TaskMode } from "./TaskViews";
 
-// S1-07: maqsadlar xaritasi — yil va kvartal ko'rinishlari. Oy/hafta (S1-08) va "Bugun" (S1-09) keyin qo'shiladi.
+// S1-07: maqsadlar xaritasi — yil va kvartal ko'rinishlari.
+// S1-08: oy va hafta — davr maqsadlari + vazifalar (ro'yxat yoki kanban). "Bugun" sahifasi — S1-09.
 
-export const GOAL_VIEWS = ["yil", "kvartal"] as const;
+export const GOAL_VIEWS = ["yil", "kvartal", "oy", "hafta"] as const;
 export type GoalView = (typeof GOAL_VIEWS)[number];
-const VIEW_LEVEL: Record<GoalView, "year" | "quarter"> = { yil: "year", kvartal: "quarter" };
+export const TASK_MODES = ["royxat", "kanban"] as const satisfies readonly TaskMode[];
+const VIEW_LEVEL: Record<GoalView, "year" | "quarter" | "month" | "week"> = {
+  yil: "year",
+  kvartal: "quarter",
+  oy: "month",
+  hafta: "week",
+};
+const taskView = (v: GoalView): v is "oy" | "hafta" => v === "oy" || v === "hafta";
 
 /** URL'dagi davr kalitini ko'rinish darajasiga keltiradi (masalan `kvartal` + `2026` → shu yilning joriy/1-kvartali). */
 export function resolvePeriod(view: GoalView, key: string | undefined, today = toLocalIsoDate()): Period {
@@ -36,15 +46,18 @@ export function resolvePeriod(view: GoalView, key: string | undefined, today = t
   return periodOf(level, inside ? today : parsed.start);
 }
 
-export function GoalsPage({ view, period: key }: { view: GoalView; period?: string }) {
+export function GoalsPage({ view, period: key, mode }: { view: GoalView; period?: string; mode: TaskMode }) {
   const navigate = useNavigate({ from: "/maqsadlar" });
   const today = toLocalIsoDate();
   const period = resolvePeriod(view, key, today);
   const tree = useGoalTree(periodKey(period));
   const flat = useMemo(() => flattenTree(tree.data ?? []), [tree.data]);
+  const tasks = useTasks(periodKey(period), taskView(view));
   const [sheet, setSheet] = useState<SheetTarget | null>(null);
+  const [taskSheet, setTaskSheet] = useState<TaskTarget | null>(null);
 
-  const go = (v: GoalView, p: Period) => navigate({ search: { view: v, period: periodKey(p) } });
+  const go = (v: GoalView, p: Period, m: TaskMode = mode) =>
+    navigate({ search: { view: v, period: periodKey(p), ...(m !== "royxat" ? { mode: m } : {}) } });
   const create = (level: GoalLevel, date: string, parentId?: string) =>
     setSheet({ kind: "create", level, date, parentId });
   const open = (id: string) => setSheet({ kind: "edit", id });
@@ -68,11 +81,6 @@ export function GoalsPage({ view, period: key }: { view: GoalView; period?: stri
               {v}
             </button>
           ))}
-          {["oy", "hafta"].map((v) => (
-            <span key={v} className="cursor-not-allowed px-3 py-1 capitalize text-muted-foreground/50" title="S1-08 da">
-              {v}
-            </span>
-          ))}
         </div>
         <div className="flex items-center gap-1">
           <Button
@@ -83,7 +91,9 @@ export function GoalsPage({ view, period: key }: { view: GoalView; period?: stri
           >
             <ChevronLeft />
           </Button>
-          <div className="min-w-32 text-center text-sm font-medium">{periodTitle(period, view !== "yil")}</div>
+          <div className="min-w-32 text-center text-sm font-medium">
+            {periodTitle(period, view !== "yil" && view !== "hafta")}
+          </div>
           <Button
             variant="outline"
             size="icon"
@@ -115,11 +125,53 @@ export function GoalsPage({ view, period: key }: { view: GoalView; period?: stri
           onCreate={create}
           onZoom={(p) => go("kvartal", p)}
         />
-      ) : (
+      ) : view === "kvartal" ? (
         <QuarterMap period={period} goals={flat} today={today} onOpen={open} onCreate={create} />
+      ) : (
+        <>
+          <TopGoals level={VIEW_LEVEL[view]} period={period} goals={flat} onOpen={open} onCreate={create} />
+          <section className="space-y-3">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-sm font-medium text-muted-foreground">Vazifalar</h2>
+              <div className="flex rounded-md bg-muted p-0.5 text-sm" role="tablist" aria-label="Ko'rinish">
+                {TASK_MODES.map((m) => {
+                  const Icon = m === "kanban" ? Columns3 : List;
+                  return (
+                    <button
+                      key={m}
+                      role="tab"
+                      aria-selected={m === mode}
+                      onClick={() => go(view, period, m)}
+                      className={cn(
+                        "flex items-center gap-1.5 rounded px-3 py-1 text-muted-foreground",
+                        m === mode && "bg-card font-medium text-foreground shadow-xs",
+                      )}
+                    >
+                      <Icon className="size-3.5" /> {m === "kanban" ? "Kanban" : "Ro'yxat"}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            {tasks.isPending ? (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Loader2 className="size-4 animate-spin" /> Yuklanmoqda…
+              </div>
+            ) : tasks.isError ? (
+              <p className="text-sm text-destructive">Vazifalarni yuklab bo'lmadi: {tasks.error.message}</p>
+            ) : (
+              (() => {
+                const props = { period, tasks: tasks.data, goals: flat, today, onOpen: setTaskSheet };
+                if (mode === "kanban") return <TaskBoard {...props} />;
+                return view === "hafta" ? <WeekList {...props} /> : <MonthList {...props} />;
+              })()
+            )}
+          </section>
+        </>
       )}
 
       <GoalSheet target={sheet} goals={flat} onClose={() => setSheet(null)} onOpen={setSheet} />
+      <TaskSheet target={taskSheet} tasks={tasks.data ?? []} goals={flat} onClose={() => setTaskSheet(null)} />
     </div>
   );
 }

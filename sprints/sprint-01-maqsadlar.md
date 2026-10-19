@@ -26,7 +26,7 @@ Yillik → kvartal → oylik → haftalik → kunlik darajadagi maqsad va vazifa
 
 ### UI
 - [x] **S1-07** Yillik va kvartal ko'rinishi (maqsadlar xaritasi) — `apps/web/src/routes/goals/` (`GoalsPage`, `GoalCard`, `GoalSheet`, `labels.ts`), `apps/web/src/lib/planning.ts`; `/maqsadlar` (`view=yil|kvartal`, `period`), davr navigatsiyasi, yil: yillik maqsadlar + 4 kvartal ustuni, kvartal: maqsadlar + 3 oy ustuni; o'ng panelda maqsad/KR yaratish, tahrirlash, o'chirish. Tekshirildi: typecheck 7/7, lint 0, format toza; brauzerda alohida test bazasi bilan sinaldi (progress yangilanishi, KR inline tahriri, yaratish/o'chirish, 375px va qorong'i rejim, konsolda xato yo'q). Qarorlar: Q-047…Q-050
-- [ ] **S1-08** Oylik va haftalik ko'rinish (kanban + ro'yxat)
+- [x] **S1-08** Oylik va haftalik ko'rinish (kanban + ro'yxat) — `/maqsadlar` da view=oy|hafta, mode=royxat|kanban; TaskViews.tsx (WeekList, MonthList, TaskBoard), TaskSheet.tsx; typecheck, lint va sinovlar o'tdi, brauzerda sinaldi
 - [ ] **S1-09** Kunlik ko'rinish: "Bugun" sahifasi, fokus ro'yxati
 - [ ] **S1-10** Drag-and-drop bilan vazifani kun/haftaga ko'chirish (dnd-kit)
 - [ ] **S1-11** Ustuvorlik, teglar, qidiruv va tezkor qo'shish (Cmd+K)

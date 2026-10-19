@@ -1,6 +1,6 @@
 // Avtomatik yaratilgan: node scripts/jarayon-sync.mjs. Qo'lda tahrirlamang.
 window.JARAYON = {
-  "yangilangan": "2026-10-19T07:06:40.060Z",
+  "yangilangan": "2026-10-19T07:55:51.402Z",
   "loyiha": "Lokal AI Dashboard",
   "sprints": [
     {
@@ -191,9 +191,9 @@ window.JARAYON = {
         },
         {
           "id": "S1-08",
-          "title": "Oylik va haftalik ko'rinish (kanban + ro'yxat)",
+          "title": "Oylik va haftalik ko'rinish (kanban + ro'yxat) — `/maqsadlar` da view=oy|hafta, mode=royxat|kanban; TaskViews.tsx (WeekList, MonthList, TaskBoard), TaskSheet.tsx; typecheck, lint va sinovlar o'tdi, brauzerda sinaldi",
           "group": "UI",
-          "status": "rejalashtirilgan"
+          "status": "bajarildi"
         },
         {
           "id": "S1-09",
@@ -1358,6 +1358,45 @@ window.JARAYON = {
       "status": "qabul qilingan",
       "kontekst": "Server Q-039 qoidasini tekshiradi; foydalanuvchi noto'g'ri tanlov qilmasligi kerak.",
       "qaror": "Faqat darajasi yuqori va davri qamragan maqsadlar ko'rsatiladi; davr o'zgarsa mos kelmagan ota tozalanadi."
+    },
+    {
+      "id": "Q-051",
+      "sarlavha": "Kanban ustunlari — vazifa holati, kunlar emas",
+      "sana": "2026-10-19",
+      "sprint": "S1 (S1-08)",
+      "status": "qabul qilingan",
+      "kontekst": "Ro'yxat ko'rinishi vazifalarni reja davri (kun/hafta) bo'yicha guruhlaydi; kanban nimani ko'rsatishi kerak edi.",
+      "qaror": "Ustunlar: Qilinadi / Jarayonda / Bajarildi (\"Bekor qilindi\" faqat bor bo'lsa). Ikki ko'rinish ikki savolga javob beradi: \"qachon?\" (ro'yxat) va \"qay holatda?\" (kanban).",
+      "oqibat": "Kunlar orasida sudrab ko'chirish S1-10 da qo'shiladi."
+    },
+    {
+      "id": "Q-052",
+      "sarlavha": "Hafta/oy darajasidagi vazifalar alohida bo'limda; oy ro'yxati haftalar bo'yicha",
+      "sana": "2026-10-19",
+      "sprint": "S1 (S1-08)",
+      "status": "qabul qilingan",
+      "kontekst": "Q-023 (kun belgilanmagan vazifalar) va Q-043 (kesishuv qoidasi).",
+      "qaror": "Ro'yxatda \"Hafta davomida\"/\"Oy davomida\" bo'limlari alohida; oy ro'yxati oyning haftalari bo'yicha, oy chegarasidan o'tgan haftalar ham kiradi."
+    },
+    {
+      "id": "Q-053",
+      "sarlavha": "Vazifa va maqsad mutatsiyalaridan keyin [\"goals\"] va [\"tasks\"] birga yangilanadi",
+      "sana": "2026-10-19",
+      "sprint": "S1 (S1-08)",
+      "status": "qabul qilingan",
+      "kontekst": "Progress serverda qayta hisoblanadi; maqsad o'chirilsa vazifalar bog'lanmagan bo'ladi (Q-024).",
+      "qaror": "Har yozishdan keyin ikkala so'rov kaliti eskiradi.",
+      "rad etilgan": "Optimistik yangilash — lokal server tez, hozircha kerak emas."
+    },
+    {
+      "id": "Q-054",
+      "sarlavha": "Ko'rinish holati (view, period, mode) URL'da",
+      "sana": "2026-10-19",
+      "sprint": "S1 (S1-08)",
+      "status": "qabul qilingan",
+      "kontekst": "Q-048 davomi: oy/hafta tablari va kanban/ro'yxat rejimi.",
+      "qaror": "`view` (yil|kvartal|oy|hafta), `period`, `mode` URL'da; standart mode — ro'yxat (URL'da yozilmaydi).",
+      "oqibat": "S1-09 TaskRow/Section/QuickAdd'ni qayta ishlatadi."
     }
   ],
   "hisobotlar": [

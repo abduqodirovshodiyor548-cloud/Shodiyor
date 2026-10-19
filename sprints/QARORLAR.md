@@ -417,3 +417,34 @@ Format (hisobotchi agent va sinxron skript shunga tayanadi):
 - **Status:** qabul qilingan
 - **Kontekst:** Server Q-039 qoidasini tekshiradi; foydalanuvchi noto'g'ri tanlov qilmasligi kerak.
 - **Qaror:** Faqat darajasi yuqori va davri qamragan maqsadlar ko'rsatiladi; davr o'zgarsa mos kelmagan ota tozalanadi.
+
+## Q-051: Kanban ustunlari — vazifa holati, kunlar emas
+- **Sana:** 2026-10-19
+- **Sprint:** S1 (S1-08)
+- **Status:** qabul qilingan
+- **Kontekst:** Ro'yxat ko'rinishi vazifalarni reja davri (kun/hafta) bo'yicha guruhlaydi; kanban nimani ko'rsatishi kerak edi.
+- **Qaror:** Ustunlar: Qilinadi / Jarayonda / Bajarildi ("Bekor qilindi" faqat bor bo'lsa). Ikki ko'rinish ikki savolga javob beradi: "qachon?" (ro'yxat) va "qay holatda?" (kanban).
+- **Oqibat:** Kunlar orasida sudrab ko'chirish S1-10 da qo'shiladi.
+
+## Q-052: Hafta/oy darajasidagi vazifalar alohida bo'limda; oy ro'yxati haftalar bo'yicha
+- **Sana:** 2026-10-19
+- **Sprint:** S1 (S1-08)
+- **Status:** qabul qilingan
+- **Kontekst:** Q-023 (kun belgilanmagan vazifalar) va Q-043 (kesishuv qoidasi).
+- **Qaror:** Ro'yxatda "Hafta davomida"/"Oy davomida" bo'limlari alohida; oy ro'yxati oyning haftalari bo'yicha, oy chegarasidan o'tgan haftalar ham kiradi.
+
+## Q-053: Vazifa va maqsad mutatsiyalaridan keyin ["goals"] va ["tasks"] birga yangilanadi
+- **Sana:** 2026-10-19
+- **Sprint:** S1 (S1-08)
+- **Status:** qabul qilingan
+- **Kontekst:** Progress serverda qayta hisoblanadi; maqsad o'chirilsa vazifalar bog'lanmagan bo'ladi (Q-024).
+- **Qaror:** Har yozishdan keyin ikkala so'rov kaliti eskiradi.
+- **Rad etilgan:** Optimistik yangilash — lokal server tez, hozircha kerak emas.
+
+## Q-054: Ko'rinish holati (view, period, mode) URL'da
+- **Sana:** 2026-10-19
+- **Sprint:** S1 (S1-08)
+- **Status:** qabul qilingan
+- **Kontekst:** Q-048 davomi: oy/hafta tablari va kanban/ro'yxat rejimi.
+- **Qaror:** `view` (yil|kvartal|oy|hafta), `period`, `mode` URL'da; standart mode — ro'yxat (URL'da yozilmaydi).
+- **Oqibat:** S1-09 TaskRow/Section/QuickAdd'ni qayta ishlatadi.

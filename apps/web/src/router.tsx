@@ -2,7 +2,8 @@ import { Outlet, createRootRoute, createRoute, createRouter } from "@tanstack/re
 import { AppShell } from "@/components/layout/AppShell";
 import { AiConsolePage } from "@/routes/AiConsole";
 import { HomePage, PlaceholderPage } from "@/routes/Home";
-import { GOAL_VIEWS, GoalsPage, type GoalView } from "@/routes/goals/GoalsPage";
+import { GOAL_VIEWS, GoalsPage, TASK_MODES, type GoalView } from "@/routes/goals/GoalsPage";
+import type { TaskMode } from "@/routes/goals/TaskViews";
 
 const rootRoute = createRootRoute({
   component: () => (
@@ -28,13 +29,14 @@ const aiRoute = createRoute({
 const goalsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/maqsadlar",
-  validateSearch: (s: Record<string, unknown>): { view?: GoalView; period?: string } => ({
+  validateSearch: (s: Record<string, unknown>): { view?: GoalView; period?: string; mode?: TaskMode } => ({
     ...(GOAL_VIEWS.includes(s.view as GoalView) ? { view: s.view as GoalView } : {}),
     ...(typeof s.period === "string" ? { period: s.period } : {}),
+    ...(TASK_MODES.includes(s.mode as TaskMode) ? { mode: s.mode as TaskMode } : {}),
   }),
   component: function GoalsRoute() {
-    const { view, period } = goalsRoute.useSearch();
-    return <GoalsPage view={view ?? "yil"} period={period} />;
+    const { view, period, mode } = goalsRoute.useSearch();
+    return <GoalsPage view={view ?? "yil"} period={period} mode={mode ?? "royxat"} />;
   },
 });
 

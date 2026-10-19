@@ -1,4 +1,12 @@
-import { periodOf, type GoalLevel, type GoalStatus, type Period } from "@loiha/shared";
+import {
+  isoWeekday,
+  periodOf,
+  type GoalLevel,
+  type GoalStatus,
+  type Period,
+  type PlanLevel,
+  type TaskStatus,
+} from "@loiha/shared";
 
 export const MONTHS = [
   "Yanvar",
@@ -61,3 +69,38 @@ export const goalPeriod = (g: { level: GoalLevel; periodStart: string; periodEnd
 });
 
 export const isCurrent = (p: Period, today: string) => periodOf(p.level, today).start === p.start;
+
+// ---------- Vazifalar (S1-08) ----------
+
+export const WEEKDAYS = ["Dushanba", "Seshanba", "Chorshanba", "Payshanba", "Juma", "Shanba", "Yakshanba"];
+
+export const TASK_STATUS_LABEL: Record<TaskStatus, string> = {
+  todo: "Qilinadi",
+  in_progress: "Jarayonda",
+  done: "Bajarildi",
+  cancelled: "Bekor qilindi",
+};
+
+/** 0 — yo'q, 1 — past, 2 — o'rta, 3 — yuqori. */
+export const PRIORITIES = [
+  { value: 0, label: "Ustuvorliksiz", dot: "" },
+  { value: 1, label: "Past", dot: "bg-muted-foreground/50" },
+  { value: 2, label: "O'rta", dot: "bg-warning" },
+  { value: 3, label: "Yuqori", dot: "bg-destructive" },
+] as const;
+
+export const PLAN_LEVEL_LABEL: Record<PlanLevel, string> = { day: "Kun", week: "Hafta", month: "Oy" };
+
+/** Kun nomi bilan: "Seshanba, 20 oktyabr". */
+export function dayTitle(date: string): string {
+  return `${WEEKDAYS[isoWeekday(date) - 1]}, ${periodTitle({ level: "day", start: date, end: date })}`;
+}
+
+/** Vazifa rejasining qisqa yorlig'i: "Ses 20", "19 okt – 25 okt", "Oktyabr" yoki null. */
+export function planShort(task: { planLevel: PlanLevel | null; planStart: string | null }): string | null {
+  if (!task.planLevel || !task.planStart) return null;
+  if (task.planLevel === "day") {
+    return `${WEEKDAYS[isoWeekday(task.planStart) - 1]!.slice(0, 3)} ${Number(task.planStart.slice(8))}`;
+  }
+  return periodTitle(periodOf(task.planLevel, task.planStart));
+}
