@@ -1,5 +1,4 @@
 import { Hono } from "hono";
-import { z } from "zod";
 import {
   createGoal,
   createKeyResult,
@@ -12,6 +11,7 @@ import {
   deleteTag,
   deleteTask,
   getGoal,
+  getGoalTree,
   getRecurrence,
   getTask,
   listGoals,
@@ -26,12 +26,13 @@ import {
   type Db,
 } from "@loiha/db";
 import {
-  GOAL_LEVELS,
   createGoalSchema,
   createKeyResultSchema,
   createRecurrenceSchema,
   createTagSchema,
   createTaskSchema,
+  goalTreeQuerySchema,
+  listGoalsQuerySchema,
   listTasksQuerySchema,
   updateGoalSchema,
   updateKeyResultSchema,
@@ -42,20 +43,12 @@ import {
 
 // S1-05: maqsadlar, key result'lar, vazifalar, takrorlanuvchi seriyalar va teglar CRUD.
 // Mantiq va progress keshini yangilash @loiha/db dagi servislarda; bu yerda faqat HTTP qatlami.
-// Davr bo'yicha filtr va daraxt so'rovlari — S1-06.
-
-const listGoalsQuerySchema = z.object({
-  level: z.enum(GOAL_LEVELS).optional(),
-  /** `root` — ota maqsadi yo'qlar. */
-  parentId: z.union([z.literal("root"), z.uuid()]).optional(),
-});
+// S1-06: ro'yxatlarda davr filtri (`period` yoki `from`/`to`) va `GET /api/goals/tree`.
 
 export function goalRoutes(db: Db) {
   return new Hono()
-    .get("/", (c) => {
-      const q = listGoalsQuerySchema.parse(c.req.query());
-      return c.json(listGoals(db, { level: q.level, parentId: q.parentId === "root" ? null : q.parentId }));
-    })
+    .get("/", (c) => c.json(listGoals(db, listGoalsQuerySchema.parse(c.req.query()))))
+    .get("/tree", (c) => c.json(getGoalTree(db, goalTreeQuerySchema.parse(c.req.query()))))
     .post("/", async (c) => c.json(createGoal(db, createGoalSchema.parse(await c.req.json())), 201))
     .get("/:id", (c) => c.json(getGoal(db, c.req.param("id"))))
     .patch("/:id", async (c) => c.json(updateGoal(db, c.req.param("id"), updateGoalSchema.parse(await c.req.json()))))

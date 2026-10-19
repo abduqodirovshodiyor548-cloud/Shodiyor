@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { isIsoDate } from "./period.ts";
+import { isIsoDate, parsePeriodKey } from "./period.ts";
 import { recurrenceRuleSchema, type RecurrenceRule } from "./recurrence.ts";
 
 // ---------- Maqsadlar, key result'lar, vazifalar: API sxemalari va DTO'lar (S1-05) ----------
@@ -94,14 +94,81 @@ export type CreateTaskInput = z.infer<typeof createTaskSchema>;
 export const updateTaskSchema = createTaskSchema.partial();
 export type UpdateTaskInput = z.infer<typeof updateTaskSchema>;
 
-export const listTasksQuerySchema = z.object({
-  goalId: id.optional(),
-  keyResultId: id.optional(),
-  recurrenceId: id.optional(),
-  status: z.enum(TASK_STATUSES).optional(),
-  limit: z.coerce.number().int().min(1).max(1000).default(200),
-});
+// ---------- So'rov filtrlari (S1-06) ----------
+//
+// Davr filtri: `period` kaliti (`2026`, `2026-Q4`, `2026-10`, `2026-W43`, `2026-10-19`) yoki `from`/`to` sanalari
+// (biri berilmasa — chegarasiz). Natijaga davr bilan kesishadigan yozuvlar kiradi.
+
+/** Query satridagi bool: `true`/`1` yoki `false`/`0`. */
+const queryBool = z.enum(["true", "false", "1", "0"]).transform((v) => v === "true" || v === "1");
+/** Vergul bilan ajratilgan qiymatlar ro'yxati, masalan `status=todo,in_progress`. */
+const csvEnum = <T extends readonly [string, ...string[]]>(values: T) =>
+  z
+    .string()
+    .transform((s) => s.split(",").filter(Boolean))
+    .pipe(z.array(z.enum(values)).min(1));
+
+const periodFilterFields = {
+  period: z
+    .string()
+    .refine((k) => parsePeriodKey(k) !== null, "Noto'g'ri davr kaliti")
+    .optional(),
+  from: isoDate.optional(),
+  to: isoDate.optional(),
+};
+type PeriodFilter = { period?: string; from?: string; to?: string };
+const periodFilterValid = (q: PeriodFilter) => !(q.period && (q.from || q.to)) && !(q.from && q.to && q.from > q.to);
+const periodFilterMessage = { message: "`period` yoki `from`/`to` (from ≤ to) dan bittasini bering" };
+
+/** Filtrdan sana oralig'i; filtr berilmagan bo'lsa `null`. */
+export function periodRange(q: PeriodFilter): { start: string; end: string } | null {
+  if (q.period) {
+    const p = parsePeriodKey(q.period);
+    if (!p) throw new RangeError(`Noto'g'ri davr kaliti: ${q.period}`);
+    return { start: p.start, end: p.end };
+  }
+  if (!q.from && !q.to) return null;
+  return { start: q.from ?? "0000-01-01", end: q.to ?? "9999-12-31" };
+}
+
+export const listGoalsQuerySchema = z
+  .object({
+    level: csvEnum(GOAL_LEVELS).optional(),
+    status: csvEnum(GOAL_STATUSES).optional(),
+    /** `root` — ota maqsadi yo'qlar. */
+    parentId: z.union([z.literal("root"), id]).optional(),
+    ...periodFilterFields,
+  })
+  .refine(periodFilterValid, periodFilterMessage);
+export type ListGoalsQuery = z.infer<typeof listGoalsQuerySchema>;
+
+export const listTasksQuerySchema = z
+  .object({
+    goalId: id.optional(),
+    keyResultId: id.optional(),
+    recurrenceId: id.optional(),
+    status: csvEnum(TASK_STATUSES).optional(),
+    planLevel: csvEnum(PLAN_LEVELS).optional(),
+    /** `true` — faqat rejalashtirilmagan (inbox) vazifalar. Davr filtri bilan birga berilmaydi. */
+    unplanned: queryBool.optional(),
+    ...periodFilterFields,
+    limit: z.coerce.number().int().min(1).max(1000).default(200),
+  })
+  .refine(periodFilterValid, periodFilterMessage)
+  .refine((q) => !(q.unplanned && periodRange(q)), { message: "`unplanned` davr filtri bilan birga berilmaydi" });
 export type ListTasksQuery = z.infer<typeof listTasksQuerySchema>;
+
+export const goalTreeQuerySchema = z
+  .object({
+    /** Berilsa — shu maqsad va uning avlodlari; aks holda davrdagi barcha ildiz maqsadlar. */
+    rootId: id.optional(),
+    status: csvEnum(GOAL_STATUSES).optional(),
+    /** Har bir tugunga uning vazifalarini qo'shish. */
+    includeTasks: queryBool.optional(),
+    ...periodFilterFields,
+  })
+  .refine(periodFilterValid, periodFilterMessage);
+export type GoalTreeQuery = z.infer<typeof goalTreeQuerySchema>;
 
 // ---------- Takrorlanuvchi seriyalar ----------
 
@@ -177,6 +244,15 @@ export interface KeyResultDto {
 
 export interface GoalDetailDto extends GoalDto {
   keyResults: KeyResultDto[];
+}
+
+/** Maqsadlar daraxti tuguni (S1-06). `taskCounts` — maqsadga bog'langan (KR orqali ham), bekor qilinmagan vazifalar. */
+export interface GoalTreeNode extends GoalDto {
+  keyResults: KeyResultDto[];
+  taskCounts: { total: number; done: number };
+  /** Faqat `includeTasks` so'ralganda. */
+  tasks?: TaskDto[];
+  children: GoalTreeNode[];
 }
 
 export interface TaskDto {

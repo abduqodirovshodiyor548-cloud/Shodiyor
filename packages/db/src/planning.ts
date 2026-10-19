@@ -1,9 +1,11 @@
-import { and, asc, desc, eq, inArray, isNull, type SQL } from "drizzle-orm";
+import { and, asc, desc, eq, gte, inArray, isNull, lte, ne, or, sql, type SQL } from "drizzle-orm";
 import {
   GOAL_LEVELS,
   describeRecurrence,
   periodKey,
   periodOf,
+  periodRange,
+  addDays,
   toLocalIsoDate,
   type CreateGoalInput,
   type CreateKeyResultInput,
@@ -13,7 +15,10 @@ import {
   type GoalDetailDto,
   type GoalDto,
   type GoalLevel,
+  type GoalTreeNode,
+  type GoalTreeQuery,
   type KeyResultDto,
+  type ListGoalsQuery,
   type ListTasksQuery,
   type RecurrenceDto,
   type TagDto,
@@ -190,11 +195,20 @@ function planColumns(plan: TaskPlanInput | null | undefined) {
 
 // ---------- Maqsadlar ----------
 
-export function listGoals(db: Db, filter: { level?: GoalLevel; parentId?: string | null } = {}): GoalDto[] {
+/** Davr bilan kesishadigan maqsadlar: `period_start <= end AND period_end >= start`. */
+function goalFilter(q: Pick<ListGoalsQuery, "level" | "status" | "period" | "from" | "to">): SQL[] {
   const where: SQL[] = [];
-  if (filter.level) where.push(eq(goals.level, filter.level));
-  if (filter.parentId === null) where.push(isNull(goals.parentId));
-  else if (filter.parentId) where.push(eq(goals.parentId, filter.parentId));
+  if (q.level) where.push(inArray(goals.level, q.level));
+  if (q.status) where.push(inArray(goals.status, q.status));
+  const range = periodRange(q);
+  if (range) where.push(lte(goals.periodStart, range.end), gte(goals.periodEnd, range.start));
+  return where;
+}
+
+export function listGoals(db: Db, query: ListGoalsQuery = {}): GoalDto[] {
+  const where = goalFilter(query);
+  if (query.parentId === "root") where.push(isNull(goals.parentId));
+  else if (query.parentId) where.push(eq(goals.parentId, query.parentId));
   return db
     .select()
     .from(goals)
@@ -357,12 +371,33 @@ function taskDto(db: Tx, id: string): TaskDto {
   return toTaskDto(requireTask(db, id), tagIdsOf(db, [id]).get(id) ?? []);
 }
 
+/**
+ * Vazifa rejasi davr bilan kesishadimi: kunlik — sana ichida; haftalik — dushanbasi `start - 6` dan keyin;
+ * oylik — oyi `start` oyidan boshlab. Hammasida `plan_start <= end`. Rejalashtirilmaganlar kirmaydi.
+ */
+function planOverlaps(range: { start: string; end: string }): SQL {
+  const weekFrom = range.start === "0000-01-01" ? range.start : addDays(range.start, -6);
+  const monthFrom = range.start === "0000-01-01" ? range.start : periodOf("month", range.start).start;
+  return and(
+    lte(tasks.planStart, range.end),
+    or(
+      and(eq(tasks.planLevel, "day"), gte(tasks.planStart, range.start)),
+      and(eq(tasks.planLevel, "week"), gte(tasks.planStart, weekFrom)),
+      and(eq(tasks.planLevel, "month"), gte(tasks.planStart, monthFrom)),
+    ),
+  )!;
+}
+
 export function listTasks(db: Db, query: ListTasksQuery): TaskDto[] {
   const where: SQL[] = [];
   if (query.goalId) where.push(eq(tasks.goalId, query.goalId));
   if (query.keyResultId) where.push(eq(tasks.keyResultId, query.keyResultId));
   if (query.recurrenceId) where.push(eq(tasks.recurrenceId, query.recurrenceId));
-  if (query.status) where.push(eq(tasks.status, query.status));
+  if (query.status) where.push(inArray(tasks.status, query.status));
+  if (query.planLevel) where.push(inArray(tasks.planLevel, query.planLevel));
+  if (query.unplanned) where.push(isNull(tasks.planLevel));
+  const range = periodRange(query);
+  if (range) where.push(planOverlaps(range));
   const rows = db
     .select()
     .from(tasks)
@@ -571,4 +606,88 @@ export function updateTag(db: Db, id: string, input: UpdateTagInput): TagDto {
 export function deleteTag(db: Db, id: string): void {
   const removed = db.delete(tags).where(eq(tags.id, id)).returning({ id: tags.id }).get();
   if (!removed) throw notFound("Teg");
+}
+
+// ---------- Maqsadlar daraxti (S1-06) ----------
+
+/**
+ * Maqsadlar daraxti: tugunlarda KR'lar, vazifa hisoblari va (so'ralsa) vazifalar.
+ * Filtr (status, davr) barcha tugunlarga qo'llanadi; `rootId` berilsa ildiz har doim kiradi.
+ * Ota maqsadi filtrdan o'tmagan maqsadlar ildiz bo'lib chiqadi. Bitta foydalanuvchi hajmi uchun
+ * maqsadlar bitta so'rov bilan olinib, daraxt xotirada quriladi.
+ */
+export function getGoalTree(db: Db, query: GoalTreeQuery = {}): GoalTreeNode[] {
+  const rows = db
+    .select()
+    .from(goals)
+    .where(and(...goalFilter(query)))
+    .orderBy(asc(goals.periodStart), asc(goals.sortOrder), asc(goals.createdAt))
+    .all();
+  const root = query.rootId ? requireGoal(db, query.rootId) : null;
+  if (root && !rows.some((g) => g.id === root.id)) rows.unshift(root);
+
+  const byId = new Map(rows.map((g) => [g.id, g]));
+  const ids = [...byId.keys()];
+  const childrenOf = new Map<string, Goal[]>();
+  for (const g of rows) {
+    if (g.parentId && byId.has(g.parentId)) {
+      childrenOf.set(g.parentId, [...(childrenOf.get(g.parentId) ?? []), g]);
+    }
+  }
+
+  const krsOf = new Map<string, KeyResultDto[]>();
+  const counts = new Map<string, { total: number; done: number }>();
+  const tasksOf = new Map<string, TaskDto[]>();
+  if (ids.length > 0) {
+    const krs = db
+      .select()
+      .from(keyResults)
+      .where(inArray(keyResults.goalId, ids))
+      .orderBy(asc(keyResults.sortOrder), asc(keyResults.createdAt))
+      .all();
+    for (const kr of krs) krsOf.set(kr.goalId, [...(krsOf.get(kr.goalId) ?? []), toKeyResultDto(kr)]);
+
+    const countRows = db
+      .select({
+        goalId: tasks.goalId,
+        total: sql<number>`count(*)`,
+        done: sql<number>`sum(${tasks.status} = 'done')`,
+      })
+      .from(tasks)
+      .where(and(inArray(tasks.goalId, ids), ne(tasks.status, "cancelled")))
+      .groupBy(tasks.goalId)
+      .all();
+    for (const c of countRows) if (c.goalId) counts.set(c.goalId, { total: c.total, done: c.done ?? 0 });
+
+    if (query.includeTasks) {
+      const taskRows = db
+        .select()
+        .from(tasks)
+        .where(inArray(tasks.goalId, ids))
+        .orderBy(asc(tasks.planStart), desc(tasks.priority), asc(tasks.sortOrder), asc(tasks.createdAt))
+        .all();
+      const tagMap = tagIdsOf(
+        db,
+        taskRows.map((t) => t.id),
+      );
+      for (const t of taskRows) {
+        if (t.goalId) tasksOf.set(t.goalId, [...(tasksOf.get(t.goalId) ?? []), toTaskDto(t, tagMap.get(t.id) ?? [])]);
+      }
+    }
+  }
+
+  const seen = new Set<string>();
+  const build = (g: Goal): GoalTreeNode => {
+    seen.add(g.id);
+    return {
+      ...toGoalDto(g),
+      keyResults: krsOf.get(g.id) ?? [],
+      taskCounts: counts.get(g.id) ?? { total: 0, done: 0 },
+      ...(query.includeTasks ? { tasks: tasksOf.get(g.id) ?? [] } : {}),
+      // `seen` — buzilgan ma'lumotdagi sikldan himoya (Q-031 dagi recompute bilan bir xil yondashuv).
+      children: (childrenOf.get(g.id) ?? []).filter((c) => !seen.has(c.id)).map(build),
+    };
+  };
+  const roots = root ? [root] : rows.filter((g) => !g.parentId || !byId.has(g.parentId));
+  return roots.map(build);
 }

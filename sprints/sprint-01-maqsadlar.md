@@ -22,7 +22,7 @@ Yillik → kvartal → oylik → haftalik → kunlik darajadagi maqsad va vazifa
 
 ### API
 - [x] **S1-05** Maqsad, key result va vazifalar uchun CRUD endpoint'lar — `/api/goals`, `/api/key-results`, `/api/tasks`, `/api/recurrences`, `/api/tags` (`apps/server/src/routes/planning.ts`); mantiq servis qatlamida `packages/db/src/planning.ts` (`PlanningError` → 404/400/409), zod sxemalari va DTO `packages/shared/src/planning.ts`. Har yozish `recompute*` bilan (Q-031). Tekshirildi: shared 37/37, db 25/25 sinov; typecheck 7/7; lint 0; format toza; server real ishga tushirilib curl bilan sinaldi (yil→kvartal→KR→vazifa zanjiri, progress 0.5 yuqoriga yetdi, 400/404/409/204, haftalik seriya 6 vazifa). Qarorlar: Q-037…Q-042
-- [ ] **S1-06** Davr bo'yicha filtr va daraxt ko'rinishidagi so'rovlar
+- [x] **S1-06** Davr bo'yicha filtr va daraxt ko'rinishidagi so'rovlar — `GET /api/goals`, `/api/goals/tree`, `/api/tasks` ga `period` kaliti (2026, 2026-Q4, 2026-10, 2026-W43, 2026-10-19) yoki `from`/`to`, `status`/`level`/`planLevel` (vergul bilan ko'p qiymat), `unplanned=true` (inbox). `getGoalTree` (KR, taskCounts, ixtiyoriy vazifalar) `packages/db/src/planning.ts` da; zod sxemalari, `periodRange()` va `GoalTreeNode` `packages/shared/src/planning.ts` da. Tekshirildi: shared 37/37, db 35/35 (10 ta yangi: `planning-queries.test.ts`); typecheck 7/7; lint 0; format toza; server vaqtinchalik bazada real sinaldi (W43 kunlik+oylik reja chiqdi, kelasi hafta chiqmadi; daraxt 2026 → Q4 → W43; noto'g'ri kalit 400). Qarorlar: Q-043…Q-046
 
 ### UI
 - [ ] **S1-07** Yillik va kvartal ko'rinishi (maqsadlar xaritasi)

@@ -1,6 +1,6 @@
 // Avtomatik yaratilgan: node scripts/jarayon-sync.mjs. Qo'lda tahrirlamang.
 window.JARAYON = {
-  "yangilangan": "2026-10-19T06:45:59.580Z",
+  "yangilangan": "2026-10-19T06:54:47.096Z",
   "loyiha": "Lokal AI Dashboard",
   "sprints": [
     {
@@ -179,9 +179,9 @@ window.JARAYON = {
         },
         {
           "id": "S1-06",
-          "title": "Davr bo'yicha filtr va daraxt ko'rinishidagi so'rovlar",
+          "title": "Davr bo'yicha filtr va daraxt ko'rinishidagi so'rovlar — `GET /api/goals`, `/api/goals/tree`, `/api/tasks` ga `period` kaliti (2026, 2026-Q4, 2026-10, 2026-W43, 2026-10-19) yoki `from`/`to`, `status`/`level`/`planLevel` (vergul bilan ko'p qiymat), `unplanned=true` (inbox). `getGoalTree` (KR, taskCounts, ixtiyoriy vazifalar) `packages/db/src/planning.ts` da; zod sxemalari, `periodRange()` va `GoalTreeNode` `packages/shared/src/planning.ts` da. Tekshirildi: shared 37/37, db 35/35 (10 ta yangi: `planning-queries.test.ts`); typecheck 7/7; lint 0; format toza; server vaqtinchalik bazada real sinaldi (W43 kunlik+oylik reja chiqdi, kelasi hafta chiqmadi; daraxt 2026 → Q4 → W43; noto'g'ri kalit 400). Qarorlar: Q-043…Q-046",
           "group": "API",
-          "status": "rejalashtirilgan"
+          "status": "bajarildi"
         },
         {
           "id": "S1-07",
@@ -1280,6 +1280,46 @@ window.JARAYON = {
       "kontekst": "Q-035 seriya o'zgarganda qayta yaratishni talab qildi; o'tmishdagi start_date \"qarz\" vazifalar to'plashi mumkin edi.",
       "qaror": "Seriya o'zgarganda/to'xtatilganda bugundan boshlab boshlanmagan (todo) takrorlanishlar qayta yaratiladi; o'chirilganda o'tganlari oddiy vazifa bo'lib qoladi. `materializeRecurrences(db, { from, until })` endi `from` (standart bugun) dan oldin vazifa yaratmaydi. Q-035 ni aniqlashtiradi.",
       "oqibat": "Ma'lum cheklov — qayta yaratilgan todo vazifalardagi qo'lda o'zgarishlar yo'qoladi. S1-06 list endpoint'larga davr filtri va daraxt so'rovlarini qo'shadi."
+    },
+    {
+      "id": "Q-043",
+      "sarlavha": "Davr filtri kesishuv (overlap) semantikasi bilan ishlaydi",
+      "sana": "2026-10-19",
+      "sprint": "S1 (S1-06)",
+      "status": "qabul qilingan",
+      "kontekst": "Maqsad va vazifalar turli davrlarda (yil/kvartal/oy/hafta/kun); \"shu haftaning ro'yxati\" uchun bitta qoida kerak edi.",
+      "qaror": "Maqsad: `period_start <= end AND period_end >= start`. Vazifa rejasi davri so'ralgan oraliq bilan kesishsa kiradi (hafta ko'rinishida shu oyning oylik vazifalari ham chiqadi, oy ko'rinishida oy chegarasidan o'tgan hafta ham). Toraytirish uchun `planLevel`. SQL'da indeksga mos oddiy shartlar (haftalik: plan_start >= start-6, oylik: plan_start >= oy boshi).",
+      "rad etilgan": "faqat davr ichida to'liq joylashganlar — oylik vazifalar hafta ko'rinishida yo'qolardi.",
+      "oqibat": "S1-07…S1-09 UI va S1-12 MCP shu qoidadan foydalanadi."
+    },
+    {
+      "id": "Q-044",
+      "sarlavha": "Filtr kirishi — `period` kaliti yoki `from`/`to`",
+      "sana": "2026-10-19",
+      "sprint": "S1 (S1-06)",
+      "status": "qabul qilingan",
+      "kontekst": "Filtrni bir ma'noli berish kerak.",
+      "qaror": "`period` (Q-028 dagi periodKey formati) yoki `from`/`to` — ikkalasi birga berilsa 400. `status`, `level`, `planLevel` vergul bilan bir nechta qiymat qabul qiladi. Vazifalarda `unplanned=true` (inbox)."
+    },
+    {
+      "id": "Q-045",
+      "sarlavha": "Maqsad daraxti xotirada quriladi",
+      "sana": "2026-10-19",
+      "sprint": "S1 (S1-06)",
+      "status": "qabul qilingan",
+      "kontekst": "`getGoalTree` ierarxiyani qaytarishi kerak.",
+      "qaror": "Barcha maqsadlar bitta so'rov bilan olinib xotirada quriladi (bitta foydalanuvchi hajmi); filtr barcha tugunlarga qo'llanadi; otasi filtrdan o'tmagan maqsad ildiz bo'lib chiqadi; `rootId` berilsa ildiz doim kiradi; `seen` bilan sikldan himoya. `taskCounts` — maqsadga bog'langan (Q-040 bo'yicha KR orqali ham) bekor qilinmagan vazifalar {total, done}.",
+      "rad etilgan": "rekursiv SQL CTE — murakkabroq, foyda yo'q."
+    },
+    {
+      "id": "Q-046",
+      "sarlavha": "Ro'yxat filtrlari `@loiha/shared` zod sxemalari bilan",
+      "sana": "2026-10-19",
+      "sprint": "S1 (S1-06)",
+      "status": "qabul qilingan",
+      "kontekst": "Server va MCP bir xil tekshiruvdan o'tishi kerak.",
+      "qaror": "`listGoalsQuerySchema`, `listTasksQuerySchema`, `goalTreeQuerySchema` shared'da; servis funksiyalari parse qilingan qiymatni qabul qiladi (S1-12 MCP ham shu sxemalardan o'tkazadi).",
+      "oqibat": "Teg va matn bo'yicha qidiruv — S1-11."
     }
   ],
   "hisobotlar": [

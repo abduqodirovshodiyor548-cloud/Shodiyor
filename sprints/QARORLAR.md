@@ -355,3 +355,35 @@ Format (hisobotchi agent va sinxron skript shunga tayanadi):
 - **Kontekst:** Q-035 seriya o'zgarganda qayta yaratishni talab qildi; o'tmishdagi start_date "qarz" vazifalar to'plashi mumkin edi.
 - **Qaror:** Seriya o'zgarganda/to'xtatilganda bugundan boshlab boshlanmagan (todo) takrorlanishlar qayta yaratiladi; o'chirilganda o'tganlari oddiy vazifa bo'lib qoladi. `materializeRecurrences(db, { from, until })` endi `from` (standart bugun) dan oldin vazifa yaratmaydi. Q-035 ni aniqlashtiradi.
 - **Oqibat:** Ma'lum cheklov — qayta yaratilgan todo vazifalardagi qo'lda o'zgarishlar yo'qoladi. S1-06 list endpoint'larga davr filtri va daraxt so'rovlarini qo'shadi.
+
+## Q-043: Davr filtri kesishuv (overlap) semantikasi bilan ishlaydi
+- **Sana:** 2026-10-19
+- **Sprint:** S1 (S1-06)
+- **Status:** qabul qilingan
+- **Kontekst:** Maqsad va vazifalar turli davrlarda (yil/kvartal/oy/hafta/kun); "shu haftaning ro'yxati" uchun bitta qoida kerak edi.
+- **Qaror:** Maqsad: `period_start <= end AND period_end >= start`. Vazifa rejasi davri so'ralgan oraliq bilan kesishsa kiradi (hafta ko'rinishida shu oyning oylik vazifalari ham chiqadi, oy ko'rinishida oy chegarasidan o'tgan hafta ham). Toraytirish uchun `planLevel`. SQL'da indeksga mos oddiy shartlar (haftalik: plan_start >= start-6, oylik: plan_start >= oy boshi).
+- **Rad etilgan:** faqat davr ichida to'liq joylashganlar — oylik vazifalar hafta ko'rinishida yo'qolardi.
+- **Oqibat:** S1-07…S1-09 UI va S1-12 MCP shu qoidadan foydalanadi.
+
+## Q-044: Filtr kirishi — `period` kaliti yoki `from`/`to`
+- **Sana:** 2026-10-19
+- **Sprint:** S1 (S1-06)
+- **Status:** qabul qilingan
+- **Kontekst:** Filtrni bir ma'noli berish kerak.
+- **Qaror:** `period` (Q-028 dagi periodKey formati) yoki `from`/`to` — ikkalasi birga berilsa 400. `status`, `level`, `planLevel` vergul bilan bir nechta qiymat qabul qiladi. Vazifalarda `unplanned=true` (inbox).
+
+## Q-045: Maqsad daraxti xotirada quriladi
+- **Sana:** 2026-10-19
+- **Sprint:** S1 (S1-06)
+- **Status:** qabul qilingan
+- **Kontekst:** `getGoalTree` ierarxiyani qaytarishi kerak.
+- **Qaror:** Barcha maqsadlar bitta so'rov bilan olinib xotirada quriladi (bitta foydalanuvchi hajmi); filtr barcha tugunlarga qo'llanadi; otasi filtrdan o'tmagan maqsad ildiz bo'lib chiqadi; `rootId` berilsa ildiz doim kiradi; `seen` bilan sikldan himoya. `taskCounts` — maqsadga bog'langan (Q-040 bo'yicha KR orqali ham) bekor qilinmagan vazifalar {total, done}.
+- **Rad etilgan:** rekursiv SQL CTE — murakkabroq, foyda yo'q.
+
+## Q-046: Ro'yxat filtrlari `@loiha/shared` zod sxemalari bilan
+- **Sana:** 2026-10-19
+- **Sprint:** S1 (S1-06)
+- **Status:** qabul qilingan
+- **Kontekst:** Server va MCP bir xil tekshiruvdan o'tishi kerak.
+- **Qaror:** `listGoalsQuerySchema`, `listTasksQuerySchema`, `goalTreeQuerySchema` shared'da; servis funksiyalari parse qilingan qiymatni qabul qiladi (S1-12 MCP ham shu sxemalardan o'tkazadi).
+- **Oqibat:** Teg va matn bo'yicha qidiruv — S1-11.
